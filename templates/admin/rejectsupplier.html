@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body><form action="" method="post"><table width="200" border="1">
+  <tr>
+    <th scope="row"><input type="text" name="textfield" id="textfield" /></th>
+    <td><input type="submit" name="submit" id="submit" value="Search" /></td>
+  </tr>
+</table><table width="200" border="1">
+  <tr>
+    <th scope="row">Sl.no</th>
+    <td>Company Name</td>
+    <td>Email</td>
+    <td>Phone</td>
+    <td>Website</td>
+    <td>Location</td>
+    <td>Industry</td>
+      <td>certification(id proof)</td>
+   
+
+      
+      
+  </tr>
+      {% for i in data %}
+  <tr>
+  <th scope="row">&nbsp;{{ forloop.counter }}</th>
+    <td>&nbsp;<img src="{{ i.logo }}" alt="" height="50px" width="50px"/><br>{{ i.companyname }}</td>
+    <td>&nbsp;{{ i.email }}</td>
+    <td>{{ i.phone }}</td>
+    <td>&nbsp;{{ i.website }}</td>
+    <td>{{ i.location }}</td>
+    <td>{{ i.industry }}</td>
+    <td>&nbsp<img src="{{ i.certification }}" alt="" height="50px" width="50px"/></td>
+  </tr>
+    {% endfor %}
+</table>
+
+</form>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body><form action="/myapp/managerawmaterialsaddsupplierpost/" method="post"><table width="200" border="1">
+    {% csrf_token %}
+  <tr>
+    <th scope="row">Name</th>
+    <td>&nbsp;<input type="text" name="name"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Category</th>
+    <td>&nbsp;<input type="text" name="category"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Description</th>
+    <td>&nbsp;<input type="text" name="description"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Origin</th>
+    <td>&nbsp;<input type="text" name="origin"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Harvest/Production date</th>
+    <td>&nbsp;<input type="text" name="harvest"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Cost</th>
+    <td>&nbsp;<input type="text" name="cost"/></td>
+  </tr>
+  <tr>
+    <tr>
+        <th scope="row">Quantity</th>
+        <td>&nbsp;<input type="text" name="quantity"/></td>
+    </tr>
+  <tr>
+    <th scope="row">Certification</th>
+    <td>&nbsp;<input type="text" name="certificate"/></td>
+  </tr>
+  <tr>
+    <th scope="row">&nbsp;</th>
+    <td><input type="submit" name="button" id="button" value="Add" /></td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body><form action="" method="post"><table width="188" border="1">
+  <tr>
+    <th width="168" scope="row">logo</th>
+    <td width="8">&nbsp;<img src="{{ data.logo }}" height="50px" width="50px" alt=""/></td>
+  </tr>
+    <tr>
+    <th width="168" scope="row">Company Name</th>
+{#        this to take datas from the db#}
+    <td width="8">{{ data.companyname }}</td> 
+  </tr>
+  <tr>
+    <th scope="row">Email</th>
+    <td>&nbsp;{{ data.email }}</td>
+  </tr>
+  <tr>
+    <th scope="row">Phone</th>
+    <td>&nbsp;{{ data.phone }}</td>
+  </tr>
+  <tr>
+    <th scope="row">Website</th>
+    <td>&nbsp;{{ data.website }}</td>
+  </tr>
+  <tr>
+    <th scope="row">Location</th>
+    <td>&nbsp;{{ data.location }}</td>
+  </tr>
+  <tr>
+    <th scope="row">Industry</th>
+    <td>&nbsp;{{ data.industry }}</td>
+  </tr>
+  
+  <tr>
+    <th scope="row">Certification</th>
+    <td>&nbsp;{{ data.certification }}</td>
+  </tr>
+  <tr>
+    <th scope="row">&nbsp;</th>
+    <td><a href="/myapp/editsupplier/">Edit</a></td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
