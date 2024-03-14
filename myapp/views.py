@@ -73,9 +73,20 @@ def approvesupplieradmin(request):
     return render(request,'admin/approvesupplier.html', {'data':obj})
 
 
+def approvesupplieradminpost(request):
+    search=request.POST['textfield']
+    obj = Supplier.objects.filter(status='approved',companyname__icontains=search)
+    return render(request, 'admin/approvesupplier.html', {'data': obj})
+
+
 def rejectsupplieradmin(request):
     obj = Supplier.objects.filter(status='reject')
     return render(request,'admin/rejectsupplier.html', {'data':obj})
+
+def rejectsupplieradminpost(request):
+    search=request.POST['textfield']
+    obj = Supplier.objects.filter(status='reject',companyname__icontains=search)
+    return render(request, 'admin/rejectsupplier.html', {'data': obj})
 
 
 def viewmanufactureadmin(request):
@@ -102,6 +113,12 @@ def approvemanufactureadmin(request):
     obj = Manufacture.objects.filter(status='approved')
     return render(request,'admin/approvemanufacture.html', {'data':obj})
 
+def approvemanufactureadminpost(request):
+    search=request.POST['textfield']
+    obj = Manufacture.objects.filter(status='approved',name__icontains=search)
+    return render(request, 'admin/approvemanufacture.html', {'data': obj})
+
+
 def rejectmanufactureadmin(request):
     obj = Manufacture.objects.filter(status='reject')
     return render(request,'admin/rejectmanufacture.html', {'data':obj})
@@ -119,6 +136,8 @@ def sellersapprove(request,id):
     obj1=Login.objects.filter(id=id).update(type='seller')
     return HttpResponse('''<script>alert('successfully approved');window.location='/myapp/viewselleradmin/'</script>''')
 
+
+
 def sellersreject(request,id):
     obj=Seller.objects.filter(LOGIN=id).update(status='reject')
     obj1=Login.objects.filter(id=id).update(type='pending')
@@ -130,9 +149,21 @@ def approveselleradmin(request):
     obj = Seller.objects.filter(status='approved')
     return render(request,'admin/approvesellers.html',{'data':obj})
 
+def approveselleradminpost(request):
+    search = request.POST['textfield']
+    obj = Seller.objects.filter(status='approved',companyname__icontains=search)
+    return render(request, 'admin/approvesellers.html', {'data': obj})
+
+
 def rejectselleradmin(request):
     obj = Seller.objects.filter(status='reject')
     return render(request,'admin/rejectsellers.html',{'data':obj})
+
+def rejectselleradminpost(request):
+    search = request.POST['textfield']
+    obj = Seller.objects.filter(status='reject',companyname__icontains=search)
+    return render(request, 'admin/rejectsellers.html', {'data': obj})
+
 
 def viewcomplaintadmin(request):
     obj=Complaint.objects.all()
@@ -191,26 +222,26 @@ def signupsupplierpost(request):
     email = request.POST['textfield2']
     phone = request.POST['textfield3']
     website = request.POST['textfield4']
-    location = request.POST['textfield6']
-    industry = request.POST['textfield7']
-    status = request.POST['textfield8']
-    logo = request.FILES['logofile']
-    certification = request.FILES['certificationfile']
-    password = request.POST['password']
-    confirm_password = request.POST['confirm_password']
+    location = request.POST['textfield5']
+    industry = request.POST['textfield6']
+    # status = request.POST['textfield8']
+    logo = request.FILES['textfield7']
+    certification = request.FILES['textfield8']
+    password = request.POST['textfield9']
+    confirm_password = request.POST['textfield10']
 
     from datetime import datetime
-    date=datetime.now().strftime('%Y%m%d-%H%M%S')+'.jpg' #this for logo images do some changes in settings.ppy and djangoproject/urls.py then add these lines in views.py file
+    date=datetime.now().strftime('%Y%m%d-%H%M%S')+'-1.jpg' #this for logo images do some changes in settings.ppy and djangoproject/urls.py then add these lines in views.py file
     fs=FileSystemStorage()
     fn=fs.save(date,logo)
     path=fs.url(date)
 
 
     from datetime import datetime #for the certificate images
-    date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  #year,month,date,hour,minute,second
+    date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '-2.jpg'  #year,month,date,hour,minute,second
     fs1 = FileSystemStorage()
     fn1 = fs1.save(date1, certification)
-    path1 = fs.url(date1)
+    path1 = fs1.url(date1)
 
     obj= Login() #when supplier wants to signup should go datas to login table and supplier table
     obj.username=email
@@ -218,18 +249,19 @@ def signupsupplierpost(request):
     obj.type='pending'
     obj.save() #save to the db
 
-    objj= Supplier() #datas for the supplier table
-    objj.companyname=companyname
-    objj.email=email
-    objj.LOGIN=obj
-    objj.phone=phone
-    objj.website=website
-    objj.location=location
-    objj.industry=industry
-    objj.status=status
-    objj.logo=path
-    objj.certification=path1
-    objj.save()
+    if password==confirm_password:
+        objj= Supplier() #datas for the supplier table
+        objj.companyname=companyname
+        objj.email=email
+        objj.LOGIN=obj
+        objj.phone=phone
+        objj.website=website
+        objj.location=location
+        objj.industry=industry
+        objj.status='pending'
+        objj.logo=path
+        objj.certification=path1
+        objj.save()
     return HttpResponse('''<script>alert('registered successfully');window.location='/myapp/loginadmin/'</script>''')
 
 
@@ -421,23 +453,23 @@ def signupmanufacturepost(request):
     location= request.POST['textfield5']
     registrationdate= request.POST['textfield6']
     status= request.POST['textfield7']
-    logo= request.POST['textfield8']
-    certificate= request.POST['textfield9']
+    logo= request.FILES['textfield8']
+    certification= request.FILES['textfield9']
     password= request.POST['textfield10']
     confirmpassword= request.POST['textfield11']
 
     from datetime import datetime
     date = datetime.now().strftime(
-        '%Y%m%d-%H%M%S') + '.jpg'  # this for logo images do some changes in settings.ppy and djangoproject/urls.py then add these lines in views.py file
+        '%Y%m%d-%H%M%S') + '-1.jpg'  # this for logo images do some changes in settings.ppy and djangoproject/urls.py then add these lines in views.py file
     fs = FileSystemStorage()
     fn = fs.save(date, logo)
     path = fs.url(date)
 
     from datetime import datetime  # for the certificate images
-    date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
+    date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '-2.jpg'  # year,month,date,hour,minute,second
     fs1 = FileSystemStorage()
-    fn1 = fs1.save(date1, certificate)
-    path1 = fs.url(date1)
+    fn1 = fs1.save(date1, certification)
+    path1 = fs1.url(date1)
 
 
     log=Login()
@@ -458,6 +490,7 @@ def signupmanufacturepost(request):
     obj.logo=path
     obj.certification=path1
     obj.LOGIN=log
+    obj.status='pending'
     obj.save()
     return HttpResponse('''<script>alert(' welcome');window.location='/myapp/loginadmin/'</script>''')
 
@@ -658,7 +691,7 @@ def signupsellerpost(request):
     obj.save()
     return HttpResponse('''<script>alert(' welcome');window.location='/myapp/loginadmin/'</script>''')
 
-#
+
 # def loginseller(request):
 #     return render(request, 'login.html')
 

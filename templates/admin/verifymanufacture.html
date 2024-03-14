@@ -28,7 +28,7 @@
       {% for i in data %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td>&nbsp;{{ i.name }}</td>
+      <td>&nbsp;<img src="{{ i.logo }}" height="50px" width="50px" > {{ i.name }}</td>
       <td>{{ i.email }}</td>
       <td>{{ i.phone }}</td>
       <td>&nbsp;{{ i.website }}</td>
