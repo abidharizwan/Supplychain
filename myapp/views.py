@@ -19,9 +19,14 @@ def loginpost(request): #create post method to take data
         log1=Login.objects.get(username=username,password=password)  #retrieving a single record from the Login table where the username and password match specific values.
         request.session['lid']=log1.id #assigns the value of the id field of the log1 object to a session variable named 'lid'.
         if log1.type=='admin':
-            return HttpResponse('''<script>alert('welcome');window.location='/myapp/adminhome/'</script>''') #returns an HTTP response containing JavaScript code that displays an alert message and redirects the user's browser to another URL.
+            return HttpResponse('''<script>alert('welcome');window.location='/myapp/adminhome/'</script>''')#returns an HTTP response containing JavaScript code that displays an alert message and redirects the user's browser to another URL.
+        if log1.type=='supplier':
+            return HttpResponse('''<script>alert('welcome');window.location='/myapp/supplierhome/'</script>''')
+
         if log1.type=='manufacture':
             return HttpResponse('''<script>alert('welcome');window.location='/myapp/manufacturehome/'</script>''') #returns an HTTP response containing JavaScript code that displays an alert message and redirects the user's browser to another URL.
+        if log1.type=='seller':
+            return  HttpResponse('''<script>alert('welcome');window.location='/myapp/sellerhome/'</script>''')
         else:
             return HttpResponse('''<script>alert('invalid');window.location='/myapp/loginadmin/'</script>''')
     else:
@@ -205,7 +210,7 @@ def viewuser(request):
 
 def viewuserpost(request):
     search = request.POST['textfield']
-    obj = User.objects.filter(username=search)
+    obj = User.objects.filter(username__icontains=search)
     return render(request, 'admin/viewusers.html', {'data': obj})
 
 def adminhome(request):
@@ -269,6 +274,8 @@ def loginsupplier(request):
     return render(request, 'login.html')
 
 
+
+
 def viewprofilesupplier(request):
     obj=Supplier.objects.get(LOGIN_id=request.session['lid'])
     return render(request, 'supplier/viewprofile.html',{'data':obj})
@@ -284,7 +291,6 @@ def editsupplierpost(request):
     website=request.POST['textfield4']
     location=request.POST['textfield5']
     industry=request.POST['textfield6']
-    certification=request.POST['textfield8']
 
 
     obj=Supplier.objects.get(LOGIN_id=request.session['lid'])
@@ -298,13 +304,22 @@ def editsupplierpost(request):
         obj.logo = path1
         obj.save()
 
+    if 'textfield8' in request.FILES:
+        certification = request.FILES['textfield8']
+        from datetime import datetime  # for the logo images
+        date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
+        fs2 = FileSystemStorage()
+        fn2 = fs2.save(date2, certification)
+        path2 = fs2.url(date2)
+        obj.certificate = path2
+        obj.save()
+
     obj.companyname=name
     obj.email=email
     obj.phone=phone
     obj.website=website
     obj.location=location
     obj.industry=industry
-    obj.certification=certification
     obj.save()
     return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewprofilesupplier/'</script>''')
 
@@ -334,7 +349,7 @@ def managerawmaterialsaddsupplierpost(request):
     obj.certification=certification
     obj.SUPPLIER=Supplier.objects.get(LOGIN_id=request.session['lid']) #for foreign key
     obj.save()
-    return HttpResponse('''<script>alert('added ');window.location='/myapp/managerawmaterialsaddsupplier/'</script>''')
+    return HttpResponse('''<script>alert('added ');window.location='/myapp/supplierhome/'</script>''')
 
 
 def viewrawmaterialsedit(request):
@@ -383,6 +398,12 @@ def viewstock(request):
     obj=Stockrawmaterial.objects.all()
     return render(request, 'supplier/viewstock.html',{'data':obj})
 
+def viewstockpost(request):
+    search=request.POST['textfield']
+    obj = Stockrawmaterial.objects.filter(RAWMATERIAL__name=search)
+    return render(request, 'supplier/viewstock.html', {'data': obj})
+
+
 def addstocksupplier(request):
     obj=Rawmaterials.objects.all()
     return render(request, 'supplier/addstock.html', {'data':obj})
@@ -394,19 +415,21 @@ def addstocksupplierpost(request):
     obj = Stockrawmaterial()
     obj.quantity = quantity
     obj.RAWMATERIAL_id = rawmaterial  # for foreign key
-    return HttpResponse('''<script>alert('stock added ');window.location='/myapp/addstocksupplier/'</script>''')
+    obj.save()
+    return HttpResponse('''<script>alert('stock added ');window.location='/myapp/supplierhome/'</script>''')
 
 
 
 def editstocksupplier(request,id):
-    obj = Stockrawmaterial.objects.get(id=id)
+    obj1 = Stockrawmaterial.objects.get(id=id)
     obj = Rawmaterials.objects.all()
-    return render(request, 'supplier/editstock.html', {'data': obj})
+    return render(request, 'supplier/editstock.html', {'data': obj,'data1':obj1})
 
 
 def editstocksupplierpost(request):
     quantity = request.POST['textfield']
     rawmaterial = request.POST['textfield2']
+    id = request.POST['id']
 
     obj = Stockrawmaterial.objects.get(id=id)
     obj.RAWMATERIAL_id = rawmaterial
@@ -425,11 +448,20 @@ def viewordersfrommanufacture(request):
     obj=Rawmaterialordermain.objects.all() #to view every data
     return render(request,'supplier/viewordersfrommanufacture.html', {'data':obj})
 
+def viewordersfrommanufacturepost(request):
+    search = request.POST['textfield']
+    obj=Rawmaterialordermain.objects.filter(MANUFACTURE__name=search)
+    return render(request, 'supplier/viewordersfrommanufacture.html', {'data': obj})
+
+
 def viewordersub(request,id):
     obj=Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN=id)
     return render(request, 'supplier/ordersubsupplier.html', {'data':obj})
 
-
+def viewordersubpost(request):
+    search = request.POST['textfield']
+    obj = Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN__amount=search)
+    return render(request, 'supplier/ordersubsupplier.html', {'data': obj})
 
 def updateorderstatussupplier(request,id):
     obj=Rawmaterialordermain.objects.filter(pk=id).update(status='updated')
@@ -534,54 +566,57 @@ def manufactureeditprofile(request):
     obj=Manufacture.objects.get(LOGIN_id=request.session['lid'])
     return render(request, 'manufacture/manufactureedit.html', {'data':obj})
 
-def manufactureeditpost(request):
+def manufactureeditprofilepost(request):
     name=request.POST['textfield']
     email=request.POST['textfield2']
     phone=request.POST['textfield3']
     website=request.POST['textfield4']
     location=request.POST['textfield5']
-    Registrationdate=request.POST['textfield6']
+    registrationdate=request.POST['textfield6']
     status=request.POST['textfield7']
 
+
     obj=Manufacture.objects.get(LOGIN_id=request.session['lid'])
-    if 'logo' in request.FILES:
-        logo = request.POST['textfield8']
-
-        from datetime import datetime
-        date = datetime.now().strftime(
-            '%Y%m%d-%H%M%S') + '.jpg'  # this for logo images do some changes in settings.ppy and djangoproject/urls.py then add these lines in views.py file
-        fs = FileSystemStorage()
-        fn = fs.save(date, logo)
-        path = fs.url(date)
-        obj.logo=path
-        obj.save()
-    if 'logo' in request.FILES:
-        certification = request.FILES['textfield9']
-
-        from datetime import datetime  # for the certificate images
+    if 'textfield8' in request.FILES:
+        logo = request.FILES['textfield8']
+        from datetime import datetime  # for the logo images
         date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
         fs1 = FileSystemStorage()
-        fn1 = fs1.save(date1, certification)
-        path1 = fs.url(date)
-        obj.certification=path1
+        fn1 = fs1.save(date1, logo)
+        path1 = fs1.url(date1)
+        obj.logo = path1
         obj.save()
 
-    obj=Manufacture()
+    if 'textfield9' in request.FILES:
+        certification = request.FILES['textfield9']
+        from datetime import datetime  # for the logo images
+        date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
+        fs2 = FileSystemStorage()
+        fn2 = fs2.save(date2, certification)
+        path2 = fs2.url(date2)
+        obj.certificate = path2
+        obj.save()
+
     obj.name=name
     obj.email=email
     obj.phone=phone
     obj.website=website
     obj.location=location
-    obj.registrationdate=Registrationdate
+    obj.registrationdate=registrationdate
     obj.status=status
     obj.save()
-    return HttpResponse('''<script>alert('edited');window.location='/myapp/viewprofilemanufacture/'</script>''')
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewprofilemanufacture/'</script>''')
+
 
 
 def viewsupplier(request):
     obj = Supplier.objects.all()
     return render(request, 'manufacture/viewsupplier.html',{'obj':obj})
 
+def viewsupplierpost(request):
+    search = request.POST['textfield']
+    obj = Supplier.objects.filter(companyname__icontains=search)
+    return render(request, 'manufacture/viewsupplier.html', {'obj': obj})
 
 
 
@@ -589,6 +624,31 @@ def viewrawmaterialsandsendorder(request,id):
     obj=Stockrawmaterial.objects.filter(RAWMATERIAL=id)
     return render(request, 'manufacture/viewrawmaterial&sendorder.html',{'data':obj})
 
+def viewrawmaterialsandsendorderpost(request):
+    search = request.POST['textfield']
+    obj = Stockrawmaterial.objects.filter(RAWMATERIAL_name=search)
+    return render(request, 'manufacture/viewrawmaterial&sendorder.html', {'data': obj})
+
+def orderrawmaterial(request):
+    rid=request.POST['id']
+    quantity=request.POST['textfield']
+    obj=Rawmaterialordermain()
+    import datetime
+    obj.date=datetime.datetime.now().date()
+    obj.amount=0
+    obj.status='paid'
+    obj.MANUFACTURE=Manufacture.objects.get(LOGIN_id=request.session['lid'])
+    obj.save()
+    r=Rawmaterialoredrsub()
+    r.RAWMATERIALORDERMAIN=obj
+    r.RAWMATERIAL_id=rid
+    r.quantity=quantity
+    r.save()
+
+    return HttpResponse('''<script>alert('order placed ');window.location='/myapp/viewsupplier/'</script>''')
+
+def quantity(request,id):
+    return render(request,'manufacture/addquantity.html',{'id':id})
 
 def viewmanufactureproduct(request):
     return render(request, 'manufacture/editdeletemanufacturingproduct.html')
@@ -617,7 +677,7 @@ def managemanufactureproductaddpost(request):
     obj.unitofmeasurement=unitofmeasurement
     obj.MANUFACTUREID =Manufacture.objects.get(LOGIN_id=request.session['lid']) # for foreign key
     obj.save()
-    return HttpResponse('''<script>alert('product added ');window.location='/myapp/managemanufactureproductadd/'</script>''')
+    return HttpResponse('''<script>alert('product added ');window.location='/myapp/viewmanufactureproduct/'</script>''')
 
 
 
@@ -665,29 +725,46 @@ def signupseller(request):
 def signupsellerpost(request):
     companyname = request.POST['textfield']
     email = request.POST['textfield2']
-    address = request.POST['textfield3']
+    place = request.POST['place']
+    post = request.POST['post']
+    pin = request.POST['pin']
+    # address = request.POST['textfield3']
     website = request.POST['textfield4']
     location = request.POST['textfield5']
     dateofbirth = request.POST['textfield6']
-    status = request.POST['textfield7']
+    # status = request.POST['textfield7']
     password = request.POST['textfield8']
     confirmpassword = request.POST['textfield9']
+    certificate = request.FILES['certificate']
+    phone = request.POST['phone']
 
     log = Login()
     log.username = email
     log.password = confirmpassword
-    log.type = 'seller'
+    log.type = 'pending'
     log.save()
 
-    obj = Manufacture()
-    obj.name = companyname
+    from datetime import datetime  # for the logo images
+    date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
+    fs2 = FileSystemStorage()
+    fn2 = fs2.save(date2, certificate)
+    path2 = fs2.url(date2)
+
+    obj = Seller()
+    obj.companyname = companyname
     obj.email = email
-    obj.address = address
+    obj.place = place
+    obj.post = post
+    obj.pin = pin
     obj.website = website
     obj.location = location
     obj.dateofbirth = dateofbirth
-    obj.status = status
+    obj.status = "pending"
     obj.LOGIN = log
+    obj.phone=phone
+    import datetime
+    obj.registrationdate=datetime.datetime.now().date()
+    obj.certificate = path2
     obj.save()
     return HttpResponse('''<script>alert(' welcome');window.location='/myapp/loginadmin/'</script>''')
 
@@ -700,13 +777,58 @@ def viewandeditprofile(request):
     obj=Seller.objects.get(LOGIN_id=request.session['lid'])
     return render(request,'seller/view&editprofile.html',{'data':obj})
 
+def editseller(request):
+    obj = Seller.objects.get(LOGIN_id=request.session['lid'])
+    return render(request, 'seller/editprofile.html', {'data': obj})
+def editsellerpost(request):
+    companyname=request.POST['textfield']
+    email=request.POST['textfield2']
+    phone=request.POST['textfield3']
+    website=request.POST['textfield4']
+    location=request.POST['textfield5']
+
+
+
+    obj = Seller.objects.get(LOGIN_id=request.session['lid'])
+
+    if 'textfield6' in request.FILES:
+        certification = request.FILES['textfield6']
+        from datetime import datetime  # for the logo images
+        date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
+        fs2 = FileSystemStorage()
+        fn2 = fs2.save(date2, certification)
+        path2 = fs2.url(date2)
+        obj.certificate = path2
+        obj.save()
+
+    obj.companyname = companyname
+    obj.email = email
+    obj.phone = phone
+    obj.website = website
+    obj.location = location
+    obj.save()
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/sellerhome/'</script>''')
+
+
 
 def viewcustomerorder(request):
-    return render(request,'seller/viewcustomerorder.html')
+    obj = Customerordermain.objects.all()
+
+    return render(request,'seller/viewcustomerorder.html',{'data':obj})
 
 def viewcustomerorderpost(request):
-    obj = Seller.objects.all()
+
+    fromdate = request.POST['textfield']
+    todate = request.POST['textfield2']
+    obj = Customerordermain.objects.filter(date__range=[fromdate,todate])
+
     return render(request, 'seller/viewcustomerorder.html', {'data': obj})
+
+
+def viewordersub(request,id):
+    obj = Customerordersub.objects.filter(CUSTOMERORDERMAIN=id)
+
+    return render(request, 'seller/viewcustomerordersub.html', {'data': obj})
 
 
 def viewpayments(request):
@@ -720,32 +842,67 @@ def viewpaymentspost(request):
     return render(request,'seller/viewpayments.html',{'data':obj})
 
 
-def updateorderstatus(request):
-    return render(request, 'seller/viewcustomerorder.html')
+def updateorderstatus(request,id):
+    obj = Customerordermain.objects.filter(id=id).update(status='approved')
+    return HttpResponse('''<script>alert(' Approved');window.location='/myapp/viewcustomerorder/'</script>''')
+
+def updateorderreject(request,id):
+    obj = Customerordermain.objects.filter(id=id).update(status='rejected')
+    return HttpResponse('''<script>alert(' Rejected');window.location='/myapp/viewcustomerorder/'</script>''')
+
+def viewapprovedcustomerorder(request):
+    obj = Customerordermain.objects.filter(status='approved')
+    return render(request, 'seller/viewapprovedcustomerorder.html', {'data':obj})
+def viewapprovedcustomerorderpost(request):
+    searchfrom = request.POST['textfield']
+    searchto = request.POST['textfield']
+    obj = Customerordermain.objects.filter(status='approved',date__range=[searchfrom, searchto])
+    return render(request, 'seller/viewapprovedcustomerorder.html', {'data': obj})
+
+def viewrejectedcustomerorder(request):
+    obj = Customerordermain.objects.filter(status='rejected')
+    return render(request, 'seller/viewrejectedcustomerorder.html',  {'data':obj})
+
+def viewrejectedcustomerorderpost(request):
+    searchfrom = request.POST['textfield']
+    searchto = request.POST['textfield']
+    obj = Customerordermain.objects.filter(status='rejected',date__range=[searchfrom, searchto])
+    return render(request, 'seller/viewrejectedcustomerorder.html', {'data': obj})
 
 def viewmanufacture(request):
-    return render(request, 'seller/viewmanufacture.html')
+    obj = Manufacture.objects.all()
+    return render(request, 'seller/viewmanufacture.html', {'data':obj})
 
 def viewmanufacturepost(request):
-    obj = Seller.objects.all()
-    return render(request,'seller/viewmanufacture.html',{'data':obj})
+   search = request.POST['textfield']
+   obj = Manufacture.objects.filter(name__icontains=search)
+   return render(request,'seller/viewmanufacture.html', {'data':obj})
 
 def viewmanufacturingproducts(request):
-    return render(request, 'seller/viewmanufacturingproducts.html')
+    obj = Manufactureproducts.objects.all()
+    return render(request, 'seller/viewmanufacturingproducts.html',{'data':obj})
+
 
 def viewmanufacturingproductspost(request):
-    obj = Seller.objects.all()
-    return render(request,'seller/viewmanufacturingproducts.html',{'data':obj})
+    search = request.POST['textfield']
+    obj = Manufactureproducts.objects.filter(productname__icontains=search)
+    return render(request, 'seller/viewmanufacturingproducts.html', {'data':obj})
+
 
 def viewpurchase(request):
-    return render(request, 'seller/purchase.html')
+    obj = Purchasemain.objects.all()
+    return render(request, 'seller/purchase.html', {'data':obj})
+
+def viewpurchasesub(request,id):
+    obj = Purchasesub.objects.filter(PURCHASEMAIN=id)
+    return render(request, 'seller/purchasesub.html', {'data': obj})
 
 def viewpurchasepost(request):
     obj = Seller.objects.all()
     return render(request, 'seller/purchase.html', {'data': obj})
 
 def viewproducts(request):
-    return render(request,'seller/viewmanufacturingproducts.html',{'data':obj})
+    return render(request,'seller/viewmanufacturingproducts.html')
 
 def addproductstosale(request):
     return render(request,'seller/addproducttosale.html')

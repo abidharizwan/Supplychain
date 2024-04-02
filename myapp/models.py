@@ -97,6 +97,7 @@ class Rawmaterialordermain(models.Model):
 
 class Rawmaterialoredrsub(models.Model):
     RAWMATERIALORDERMAIN=models.ForeignKey(Rawmaterialordermain,on_delete=models.CASCADE)
+    RAWMATERIAL=models.ForeignKey(Rawmaterials,on_delete=models.CASCADE,default="")
     productdescription=models.CharField(max_length=250)
     quantity=models.CharField(max_length=100)
 
@@ -116,6 +117,11 @@ class Customerordermain(models.Model):
     amount = models.CharField(max_length=100)
     status = models.CharField(max_length=100)
 
+class Sellerordermain(models.Model):
+    SELLER = models.ForeignKey(User,on_delete=models.CASCADE)
+    date = models.DateField()
+    amount = models.CharField(max_length=100)
+    status = models.CharField(max_length=100)
 
 class Payment(models.Model):
     ORDER=models.ForeignKey(Customerordermain,on_delete=models.CASCADE)
@@ -137,10 +143,21 @@ class Customerordersub(models.Model):
     MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
     quantity = models.CharField(max_length=100)
 
+class Sellerordersub(models.Model):
+    SELLERORDERMAIN = models.ForeignKey(Customerordermain, on_delete=models.CASCADE)
+    MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
+    quantity = models.CharField(max_length=100)
+
+class Products(models.Model):
+    productname=models.CharField(max_length=100)
+    category=models.CharField(max_length=100)
+    description=models.CharField(max_length=100)
+    unitofmeasurement=models.CharField(max_length=100)
+
 class Purchasemain(models.Model):
     manufacture=models.CharField(max_length=250)
-    PRODUCT=models.ForeignKey(Manufacture,on_delete=models.CASCADE)
-    SELLER=models.ForeignKey(User,on_delete=models.CASCADE)
+    PRODUCT=models.ForeignKey(Products,on_delete=models.CASCADE)
+    SELLER=models.ForeignKey(Seller,on_delete=models.CASCADE)
 
 class Purchasesub(models.Model):
     PURCHASEMAIN=models.ForeignKey(Purchasemain,on_delete=models.CASCADE)
@@ -174,11 +191,7 @@ class Customer(models.Model):
     email=models.CharField(max_length=100)
     phone=models.BigIntegerField()
 
-class Products(models.Model):
-    productname=models.CharField(max_length=100)
-    category=models.CharField(max_length=100)
-    description=models.CharField(max_length=100)
-    unitofmeasurement=models.CharField(max_length=100)
+
 
 class Productordermain(models.Model):
     PRODUCTS=models.ForeignKey(Products,on_delete=models.CASCADE)

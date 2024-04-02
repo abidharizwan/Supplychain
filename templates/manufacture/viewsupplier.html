@@ -6,7 +6,8 @@
 </head>
 
 <body>
-<form id="form1" name="form1" method="post" action="">
+<form id="form1" name="form1" method="post" action="/myapp/viewsupplierpost/" ><table width="200" border="1">
+{% csrf_token %}
   <table width="200" border="1">
     <tr>
       <th scope="row"><input type="text" name="textfield" id="textfield" /></th>
@@ -25,7 +26,7 @@
      
       <td>Certificate</td>
     </tr>
-      {% for i in data %}
+      {% for i in obj %}
     <tr>
       <th scope="row">&nbsp;{{ forloop.counter }}</th>
       <td>&nbsp;{{ i.companyname }}</td>
@@ -35,6 +36,8 @@
       <td>&nbsp;{{ i.location }}</td>
       <td>&nbsp;{{ i.industry }}</td>
       <td>&nbsp;<img src="{{ i.certification }} height=50px width=50px"  alt=""/></td>
+        
+        <td><a href="/myapp/viewrawmaterialsandsendorder/{{ i.id }}">order</a></td>
       
     </tr>
       {% endfor %}

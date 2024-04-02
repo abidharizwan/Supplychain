@@ -5,7 +5,7 @@
 <title>Untitled Document</title>
 </head>
 
-<body><form action="/myapp/viewcustomerorderpost/" method="post"><table width="200" border="1">
+<body><form action="/myapp/viewapprovedcustomerorderpost/" method="post"><table width="200" border="1">
     {% csrf_token %}
   <tr>
     <th scope="row">From</th>
@@ -21,7 +21,7 @@
     <td>User</td>
 {#    <td>Product Name</td>#}
 {#    <td>Quantity</td>#}
-    <td>status</td>  
+{#    <td>status</td>  #}
     <td>Amount</td>
   </tr>
     {% for i in data %}
@@ -30,15 +30,14 @@
     <th scope="row">&nbsp;{{ forloop.counter }}</th>
         <td>&nbsp;{{ i.date }}</td>
         <td>&nbsp;{{ i.USER.username }}</td>
-        <td>&nbsp;{{ i.status }}</td>
+{#        <td>&nbsp;{{ i.status }}</td>#}
         <td>&nbsp;{{ i.amount }}</td>
 {#    <td>&nbsp;{{ i.MANUFACTUREPRODUCT.productname }}</td>#}
 {#    <td>&nbsp;{{ i.quantity }}</td>#}
     
        
         <td>&nbsp;<a href="/myapp/viewordersub/{{ i.id }}" >ordersub</a></td>
-          <td>&nbsp;<a href="/myapp/updateorderstatus/{{ i.id }}" >Approve</a></td>
-          <td>&nbsp;<a href="/myapp/updateorderreject/{{ i.id }}" >Reject</a></td>
+      
    {% endfor %}
   </tr>
 </table>

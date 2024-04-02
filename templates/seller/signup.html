@@ -5,7 +5,7 @@
 <title>Untitled Document</title>
 </head>
 
-<body><form action="/myapp/signupsellerpost/" method="post"><table width="200" border="1">
+<body><form action="/myapp/signupsellerpost/" method="post" enctype="multipart/form-data"><table width="200" border="1">
     {% csrf_token %}
   <tr>
     <th scope="row">Company name</th>
@@ -15,9 +15,23 @@
     <th scope="row">Email</th>
     <td><input type="text" name="textfield2" id="textfield2" /></td>
   </tr>
+    <tr>
+        <th scope="row">phone</th>
+        <td><input type="text" name="phone" id="textfield2" /></td>
+    </tr>
   <tr>
-    <th scope="row">Address</th>
-    <td><input type="text" name="textfield3" id="textfield3" /></td>
+    <th scope="row">place</th>
+    <td><input type="text" name="place" id="place" /></td>
+  </tr>
+    
+     <tr>
+    <th scope="row">post</th>
+    <td><input type="text" name="post" id="post" /></td>
+  </tr>
+    
+     <tr>
+    <th scope="row">pin</th>
+    <td><input type="text" name="pin" id="pin" /></td>
   </tr>
   <tr>
     <th scope="row">Website</th>
@@ -31,11 +45,14 @@
     <th scope="row">Date</th>
     <td><input type="text" name="textfield6" id="textfield6" /></td>
   </tr>
-  <tr>
-    <th scope="row">Status</th>
-    <td><input type="text" name="textfield7" id="textfield7" /></td>
-  </tr>
-    
+{#  <tr>#}
+{#    <th scope="row">Status</th>#}
+{#    <td><input type="text" name="textfield7" id="textfield7" /></td>#}
+{#  </tr>#}
+    <tr>
+        <th scope="row">Certificate</th>
+        <td><input type="file" name="certificate" id="certificate" /></td>
+    </tr>
    <tr>
     <th scope="row">Password</th>
     <td><input type="text" name="textfield8" id="textfield8" /></td>

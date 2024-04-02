@@ -5,7 +5,8 @@
 <title>Untitled Document</title>
 </head>
 
-<body><form action="" method="post"><table width="200" border="1">
+<body><form action="/myapp/viewmanufacturingproductspost/" method="post"><table width="200" border="1">
+    {% csrf_token %}
   <tr>
     <th scope="row"><input type="text" name="textfield" id="textfield" /></th>
     <td><input type="submit" name="button" id="button" value="Search" /></td>
@@ -19,14 +20,14 @@
       <td>Unit of measurement</td>
     </tr>
       {% for i in data %}
-    <tr>
-      <th scope="row">&nbsp;{{ forloop.counter }}</th>
-      <td>&nbsp;{{ i.productname }}</td>
-      <td>&nbsp;{{ i.category }}</td>
-      <td>&nbsp;{{ i.description }}</td>
-      <td>&nbsp;{{ i.unitofmeasurement }}</td>
-     
-    </tr>
+        <tr>
+          <th scope="row">&nbsp;{{ forloop.counter }}</th>
+          <td>&nbsp;{{ i.productname }}</td>
+          <td>&nbsp;{{ i.category }}</td>
+          <td>&nbsp;{{ i.description }}</td>
+          <td>&nbsp;{{ i.unitofmeasurement }}</td>
+        
+        </tr>
       {% endfor %}
   </table>
 </form>
