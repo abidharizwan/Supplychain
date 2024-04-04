@@ -1,50 +1,44 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Untitled Document</title>
-</head>
-
-<body><form action="/myapp/managerawmaterialsaddsupplierpost/" method="post"><table width="200" border="1">
+{% extends "supplier/supplierindex.html"%}
+{% block body %}
+<form action="/myapp/managerawmaterialsaddsupplierpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">Name</th>
-    <td>&nbsp;<input type="text" name="name" value="{{ data.name }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="name" value="{{ data.name }}"/></td>
   </tr>
   <tr>
     <th scope="row">Category</th>
-    <td>&nbsp;<input type="text" name="category" value="{{ data.category }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="category" value="{{ data.category }}"/></td>
   </tr>
   <tr>
     <th scope="row">Description</th>
-    <td>&nbsp;<input type="text" name="description" value="{{ data.description }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="description" value="{{ data.description }}"/></td>
   </tr>
   <tr>
     <th scope="row">Origin</th>
-    <td>&nbsp;<input type="text" name="origin" value="{{ data.origin }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="origin" value="{{ data.origin }}"/></td>
   </tr>
   <tr>
     <th scope="row">Harvest/Production date</th>
-    <td>&nbsp;<input type="text" name="harvest" value="{{ data.harvestorproductiondate }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="harvest" value="{{ data.harvestorproductiondate }}"/></td>
   </tr>
   <tr>
     <th scope="row">Cost</th>
-    <td>&nbsp;<input type="text" name="cost" value="{{ data.cost }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="cost" value="{{ data.cost }}"/></td>
   </tr>
   <tr>
     <tr>
         <th scope="row">Quantity</th>
-        <td>&nbsp;<input type="text" name="quantity" value="{{ data.quantityavailable }}"/></td>
+        <td>&nbsp;<input type="text" class="form-control" name="quantity" value="{{ data.quantityavailable }}"/></td>
     </tr>
   <tr>
     <th scope="row">Certification</th>
-    <td>&nbsp;<input type="text" name="certificate" value="{{ data.certification }}"/></td>
+    <td>&nbsp;<input type="text" class="form-control" name="certificate" value="{{ data.certification }}"/></td>
   </tr>
   <tr>
     <th scope="row">&nbsp;</th>
-    <td><input type="submit" name="button" id="button" value="Add" /></td>
+    <td><input type="submit" class="btn btn-info" name="button" id="button" value="Add" /></td>
   </tr>
 </table>
 </form>
-</body>
-</html>
+{% endblock %}

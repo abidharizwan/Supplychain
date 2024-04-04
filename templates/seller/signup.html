@@ -1,49 +1,44 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Untitled Document</title>
-</head>
-
-<body><form action="/myapp/signupsellerpost/" method="post" enctype="multipart/form-data"><table width="200" border="1">
+{% extends "signupindex.html"%}
+{% block body %}
+<form action="/myapp/signupsellerpost/" method="post" enctype="multipart/form-data"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">Company name</th>
-    <td><input type="text" name="textfield" id="textfield" /></td>
+    <td><input type="text" class="form-control" name="textfield" id="textfield" /></td>
   </tr>
   <tr>
     <th scope="row">Email</th>
-    <td><input type="text" name="textfield2" id="textfield2" /></td>
+    <td><input type="text" class="form-control" name="textfield2" id="textfield2" /></td>
   </tr>
     <tr>
         <th scope="row">phone</th>
-        <td><input type="text" name="phone" id="textfield2" /></td>
+        <td><input type="text" class="form-control" name="phone" id="textfield2" /></td>
     </tr>
   <tr>
     <th scope="row">place</th>
-    <td><input type="text" name="place" id="place" /></td>
+    <td><input type="text" class="form-control" name="place" id="place" /></td>
   </tr>
     
      <tr>
     <th scope="row">post</th>
-    <td><input type="text" name="post" id="post" /></td>
+    <td><input type="text" class="form-control" name="post" id="post" /></td>
   </tr>
     
      <tr>
     <th scope="row">pin</th>
-    <td><input type="text" name="pin" id="pin" /></td>
+    <td><input type="text" class="form-control" name="pin" id="pin" /></td>
   </tr>
   <tr>
     <th scope="row">Website</th>
-    <td><input type="text" name="textfield4" id="textfield4" /></td>
+    <td><input type="text" class="form-control" name="textfield4" id="textfield4" /></td>
   </tr>
   <tr>
     <th scope="row">Location</th>
-    <td><input type="text" name="textfield5" id="textfield5" /></td>
+    <td><input type="text" class="form-control" name="textfield5" id="textfield5" /></td>
   </tr>
   <tr>
     <th scope="row">Date</th>
-    <td><input type="text" name="textfield6" id="textfield6" /></td>
+    <td><input type="text" class="form-control" name="textfield6" id="textfield6" /></td>
   </tr>
 {#  <tr>#}
 {#    <th scope="row">Status</th>#}
@@ -51,22 +46,21 @@
 {#  </tr>#}
     <tr>
         <th scope="row">Certificate</th>
-        <td><input type="file" name="certificate" id="certificate" /></td>
+        <td><input type="file" class="form-control" name="certificate" id="certificate" /></td>
     </tr>
    <tr>
     <th scope="row">Password</th>
-    <td><input type="text" name="textfield8" id="textfield8" /></td>
+    <td><input type="text" class="form-control" name="textfield8" id="textfield8" /></td>
   </tr>
     
    <tr>
     <th scope="row">Confirmpassword</th>
-    <td><input type="text" name="textfield9" id="textfield9" /></td>
+    <td><input type="text" class="form-control" name="textfield9" id="textfield9" /></td>
   </tr>  
   <tr>
     <th scope="row">&nbsp;</th>
-    <td><input type="submit" name="button" id="button" value="Signup" /></td>
+    <td><input type="submit" name="button" class="btn btn-info" id="button" value="Signup" /></td>
   </tr>
 </table>
 </form>
-</body>
-</html>
+{% endblock %}

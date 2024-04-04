@@ -1,0 +1,112 @@
+<!--
+Author: W3layouts
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE HTML>
+<html lang="zxx">
+
+<head>
+	<title>Home Loan a Banking Category Flat Bootstrap Responsive Website Template | Home :: w3layouts</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+	<meta name="keywords" content="Home Loan Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+	<script>
+		addEventListener("load", function () {
+			setTimeout(hideURLbar, 0);
+		}, false);
+
+		function hideURLbar() {
+			window.scrollTo(0, 1);
+		}
+	</script>
+
+	<!-- Bootstrap Core CSS -->
+	<link href="/static/home/css/bootstrap.css" rel='stylesheet' type='text/css' />
+	<link href="/static/home/css/style.css" rel='stylesheet' type='text/css' />
+	<!-- pop up box -->
+	<link href="/static/home/css/popuo-box.css" rel="stylesheet" type="text/css" media="all" />
+	<!-- font-awesome icons -->
+	<link href="/static/home/css/fontawesome-all.min.css" rel="stylesheet">
+	<!-- //Custom Theme files -->
+	<!-- online fonts -->
+	<!-- titles -->
+	<link href="//fonts.googleapis.com/css?family=Raleway:300,400,500,600,700,800,900" rel="stylesheet">
+	<!-- body -->
+	<link href="//fonts.googleapis.com/css?family=Poppins:400,500,600,700,800" rel="stylesheet">
+</head>
+
+<body>
+	<!-- //header -->
+	<!-- banner -->
+	<!-- //banner -->
+	<!-- Products -->
+	<section class="services py-5">
+		<div class="container py-md-4 mt-md-3"> 
+			<h2 class="heading-agileinfo">Sign Up</h2>
+            {% block body %}
+            {% endblock %}
+        </div>
+    </section>
+	<!---->
+	<!-- Modal -->
+<!-- //Modal -->
+<!-- js-->
+	<script src="/static/home/js/jquery-2.2.3.min.js"></script>
+<!-- js-->
+<!-- Banner Responsiveslides -->
+	<script src="/static/home/js/responsiveslides.min.js"></script>
+	<script>
+		// You can also use "$(window).load(function() {"
+		$(function () {
+			// Slideshow 4
+			$("#slider3").responsiveSlides({
+				auto: true,
+				pager: true,
+				nav: false,
+				speed: 500,
+				namespace: "callbacks",
+				before: function () {
+					$('.events').append("<li>before event fired.</li>");
+				},
+				after: function () {
+					$('.events').append("<li>after event fired.</li>");
+				}
+			});
+
+		});
+	</script>
+<!-- // Banner Responsiveslides -->
+<!-- stats -->
+	<script src="/static/home/js/jquery.waypoints.min.js"></script>
+	<script src="/static/home/js/jquery.countup.js"></script>
+		<script>
+			$('.counter').countUp();
+		</script>
+<!-- //stats -->
+<!--pop-up-box -->
+	<script src="/static/home/js/jquery.magnific-popup.js"></script>
+	<script>
+		$(document).ready(function () {
+			$('.popup-with-zoom-anim').magnificPopup({
+				type: 'inline',
+				fixedContentPos: false,
+				fixedBgPos: true,
+				overflowY: 'auto',
+				closeBtnInside: true,
+				preloader: false,
+				midClick: true,
+				removalDelay: 300,
+				mainClass: 'my-mfp-zoom-in'
+			});
+		});
+	</script>
+	<!-- //pop-up-box -->
+	<!-- Bootstrap Core JavaScript -->
+	<script src="/static/home/js/bootstrap.js ">
+	</script>
+	<!-- //Bootstrap Core JavaScript -->
+</body>
+</html>

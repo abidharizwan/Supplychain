@@ -1,17 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Untitled Document</title>
-</head>
-
-<body><form action="/myapp/viewsupplieradminpost/" method="post"><table width="200" border="1">
+{% extends "admin/adminindex.html"%}
+{% block body %}
+<form action="/myapp/viewsupplieradminpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
-    <th scope="row"><input type="text" name="textfield" id="textfield" /></th>
-    <td><input type="submit" name="submit" id="submit" value="Search" /></td>
+    <th scope="row"><input type="text" class="form-control" required name="textfield" id="textfield" /></th>
+    <td><input type="submit" name="submit" class="btn btn-info" id="submit" value="Search" /></td>
   </tr>
-</table><table width="200" border="1">
+</table><table class="table table-bordered">
   <tr>
     <th scope="row">Sl.no</th>
     <td>Company Name</td>
@@ -38,13 +33,12 @@
     <td>{{ i.location }}</td>
     <td>{{ i.industry }}</td>
     <td>&nbsp<img src="{{ i.certification }}" alt="" height="50px" width="50px"/></td>
-    <td><a href="/myapp/supplierapprove/{{ i.LOGIN.id }}">Approve</a></td>
-      <td><a href="/myapp/supplierreject/{{ i.LOGIN.id }}">Reject</a></td>
+    <td><a class="btn-outline-info" href="/myapp/supplierapprove/{{ i.LOGIN.id }}">Approve</a></td>
+      <td><a class="btn-outline-danger" href="/myapp/supplierreject/{{ i.LOGIN.id }}">Reject</a></td>
 
   </tr>
     {% endfor %}
 </table>
 
 </form>
-</body>
-</html>
+{% endblock %}

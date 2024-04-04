@@ -1,58 +1,52 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Untitled Document</title>
-</head>
-
-<body><form action="/myapp/signupsupplierpost/" method="post"enctype="multipart/form-data"> <table width="200" border="1">
+{% extends "signupindex.html"%}
+{% block body %}
+<form action="/myapp/signupsupplierpost/" method="post"enctype="multipart/form-data"> <table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">Company name</th>
-    <td><input type="text" name="textfield" id="textfield" /></td>
+    <td><input type="text" class="form-control" name="textfield" id="textfield" /></td>
   </tr>
   <tr>
     <th scope="row">Email</th>
-    <td><input type="text" name="textfield2" id="textfield2" /></td>
+    <td><input type="text" class="form-control" name="textfield2" id="textfield2" /></td>
   </tr>
   <tr>
     <th scope="row">Phone</th>
-    <td><input type="text" name="textfield3" id="textfield3" /></td>
+    <td><input type="text" class="form-control" name="textfield3" id="textfield3" /></td>
   </tr>
   <tr>
     <th scope="row">Website</th>
-    <td><input type="text" name="textfield4" id="textfield4" /></td>
+    <td><input type="text" class="form-control" name="textfield4" id="textfield4" /></td>
   </tr>
   <tr>
     <th scope="row">Location</th>
-    <td><input type="text" name="textfield5" id="textfield5" /></td>
+    <td><input type="text" class="form-control" name="textfield5" id="textfield5" /></td>
   </tr>
   <tr>
     <th scope="row">Industry</th>
-    <td><input type="text" name="textfield6" id="textfield6" /></td>
+    <td><input type="text" class="form-control" name="textfield6" id="textfield6" /></td>
   </tr>
   <tr>
     <th scope="row">Logo</th>
-    <td><input type="file" name="textfield7" id="textfield7" /></td>
+    <td><input type="file" class="form-control" name="textfield7" id="textfield7" /></td>
   </tr>
   <tr>
     <th scope="row">Certifications</th>
-    <td><input type="file" name="textfield8" id="textfield8" /></td>
+    <td><input type="file" class="form-control" name="textfield8" id="textfield8" /></td>
   </tr>
     
     <tr>
         <th scope="row">password</th>
-        <td><input type="text" name="textfield9" id="textfield9" /></td>
+        <td><input type="text" class="form-control" name="textfield9" id="textfield9" /></td>
     </tr>
     <tr>
         <th scope="row">Confirm password</th>
-        <td><input type="text" name="textfield10" id="textfield10" /></td>
+        <td><input type="text" class="form-control" name="textfield10" id="textfield10" /></td>
     </tr>
   <tr>
     <th scope="row">&nbsp;</th>
-    <td><input type="submit" name="button" id="button" value="Signup" /></td>
+    <td><input type="submit" class="btn btn-info" name="button" id="button" value="Signup" /></td>
   </tr>
 </table>
 </form>
-</body>
-</html>
+{% endblock %}

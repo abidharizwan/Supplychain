@@ -1,5 +1,7 @@
+import smtplib
+
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from myapp.models import *
@@ -10,7 +12,7 @@ from myapp.models import *
 ###ADMIN###
 
 def loginadmin(request):
-    return render(request, 'login.html')
+    return render(request, 'loginindex.html')
 def loginpost(request): #create post method to take data
     username=request.POST['textfield'] #create a variable name called username then create it's post method
     password=request.POST['textfield2']
@@ -127,6 +129,12 @@ def approvemanufactureadminpost(request):
 def rejectmanufactureadmin(request):
     obj = Manufacture.objects.filter(status='reject')
     return render(request,'admin/rejectmanufacture.html', {'data':obj})
+
+def rejectmanufactureadminpost(request):
+    search=request.POST['textfield']
+    obj = Manufacture.objects.filter(status='reject',name__icontains=search)
+    return render(request, 'admin/rejectmanufacture.html', {'data': obj})
+
 def viewselleradmin(request):
     obj=Seller.objects.filter(status='pending')
     return render(request,'admin/verifysellers.html',{'data':obj})
@@ -214,7 +222,7 @@ def viewuserpost(request):
     return render(request, 'admin/viewusers.html', {'data': obj})
 
 def adminhome(request):
-    return render(request, 'admin/adminhome.html')
+    return render(request, 'admin/adminindex.html')
 
 
 ######## supplier ########
@@ -304,6 +312,7 @@ def editsupplierpost(request):
         obj.logo = path1
         obj.save()
 
+    obj = Supplier.objects.get(LOGIN_id=request.session['lid'])
     if 'textfield8' in request.FILES:
         certification = request.FILES['textfield8']
         from datetime import datetime  # for the logo images
@@ -470,7 +479,7 @@ def updateorderstatussupplier(request,id):
 
 
 def supplierhome(request):
-    return render(request, 'supplier/supplierhome.html')
+    return render(request, 'supplier/supplierindex.html')
 
 ### manufacture ###
 
@@ -714,7 +723,7 @@ def viewsellerorderandverifypost(request):
 
 
 def manufacturehome(request):
-    return render(request, 'manufacture/manufacturehome.html')
+    return render(request, 'manufacture/manufactureindex.html')
 
 
 ###SELLER###
@@ -920,7 +929,7 @@ def addproductstosalepost(request):
     return HttpResponse('''<script>alert(' Added');window.location='/myapp/loginadmin/'</script>''')
 
 def sellerhome(request):
-    return render(request,'seller/sellerhome.html')
+    return render(request,'seller/sellerindex.html')
 
 
 ###CUSTOMER###
@@ -929,5 +938,344 @@ def sellerhome(request):
 
 
 
+
+
+def customer_signup(request):#for signup for customers
+    name=request.POST['name']
+    email = request.POST['email']
+    phone = request.POST['phone']
+    place = request.POST['place']
+    post = request.POST['post']
+    pin = request.POST['pin']
+    district = request.POST['district']
+    gender = request.POST['gender']
+    password = request.POST['password']
+    confirmpassword = request.POST['confirmpassword']
+    photo=request.POST['photo']
+    from  datetime import datetime
+    date=datetime.now().strftime('%Y%m%d-%H%M%S')+'.jpg'# Generate a filename based on the current date and time
+    import base64
+    a=base64.b64decode(photo)# Decode base64 encoded image
+    fh=open("C:\\Users\\HP\\PycharmProjects\\supplychain\\media\\user\\"+date,'wb')# Specify the path to save the image
+    path='/media/user/'+date# Specify the path relative to your media directory
+    fh.write(a)
+    fh.close()
+
+    lobj=Login()
+    lobj.username=email
+    lobj.password=password
+    lobj.type='user'
+    lobj.save()
+
+    if password==confirmpassword:
+        obj=User()
+        obj.name=name
+        obj.email=email
+        obj.phone=phone
+        obj.place=place
+        obj.post=post
+        obj.pin=pin
+        obj.district=district
+        obj.gender=gender
+        obj.photo=path
+        obj.LOGIN=lobj
+        obj.save()
+        return JsonResponse({'status':'ok'})
+
+def customer_login(request):
+    username=request.POST['username']
+    password=request.POST['password']
+    log=Login.objects.filter(username=username,password=password)
+    if log.exists():
+        log1=Login.objects.get(username=username,password=password)
+        lid=log1.id
+        if log1.type == 'user':
+            return JsonResponse({'status':'ok','lid':str(lid),'type':log1.type})
+        else:
+            return  JsonResponse({'status':'no'})
+    else:
+        return JsonResponse({'status':'no'})
+def customer_viewprofile(request):
+    lid=request.POST['lid']
+    obj=User.objects.get(LOGIN_id=lid)
+    return JsonResponse({'status':'ok','photo':'/static/login/images/user.png','name':obj.username,'email':obj.email,'phone':obj.phone,'place':obj.place,'post':obj.post,'pin':obj.pin,'district':obj.district,'gender':obj.gender})
+
+def customer_editprofile(request):
+    name=request.POST['name']
+    email = request.POST['email']
+    phone = request.POST['phone']
+    place = request.POST['place']
+    post = request.POST['post']
+    pin = request.POST['pin']
+    district = request.POST['district']
+    gender = request.POST['gender']
+    lid=request.POST['lid']
+    photo=request.POST['photo']
+    if len(photo)>5:
+        from  datetime import datetime
+        date = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'
+        import base64
+        a = base64.b64decode(photo)
+        fh = open("C:\\Users\\HP\\PycharmProjects\\supplychain\\media\\user\\" + date, 'wb')
+        path = '/media/user/' + date
+        fh.write(a)
+        fh.close()
+        obj = User.objects.get(LOGIN_id=lid)
+        obj.photo=path
+        obj.save()
+
+    obj=User.objects.get(LOGIN_id=lid)
+    obj.name=name
+    obj.email=email
+    obj.phone=phone
+    obj.place=place
+    obj.post=post
+    obj.pin=pin
+    obj.district=district
+    obj.gender=gender
+    obj.save()
+    oo=Login.objects.get(id=lid)
+    oo.username=email
+    oo.save()
+
+
+    return JsonResponse({'status':'ok'})
+
+
+def forgot_password(request):
+    email = request.POST['email']
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login("safedore3@gmail.com", "yqqlwlyqbfjtewam")
+
+    obj = Login.objects.filter(username=email)
+    if obj.exists():
+        to = email
+        subject = "Test Email"
+        body = "Your password is " + obj[0].password
+        msg = f"Subject: {subject}\n\n{body}"
+        server.sendmail("s@gmail.com", to, msg)
+
+        server.quit()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'no'})
+
+def customer_viewproduct(request):
+    obj=Products.objects.all()
+    l=[]
+    # for i in obj:
+    #     l.append({'id':i.id,'name':i.name,'Image':i.Image,'description':i.description,
+    #               'category':i.category,'unitofmeasurement':i.unitofmeasurement})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber,'bbbbbbbbbbbbbbb')
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1],'decoded_input')
+            c= decoded_input[1]
+            man=Manufacture.objects.filter(LOGIN_id=c['manufacture_ida'])
+
+            if Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',PURCHASESUB__product=str(c['ida'])).exists():
+                if man.exists():
+                    selP = Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',PURCHASESUB__product=str(c['ida']))[0]
+                    man=man[0]
+                    print("hloooooooooooooooooooooo")
+                    l.append({'ida':c['ida'],
+                                  'id':selP.id,
+                                  'name':c['namea'],
+                                  'category':c['categorya'],
+                                  'description':c['descriptiona'],
+                                  'Image':c['specificationa'],
+                                  'unitofmeasurement':c['unitofmeasurementa'],
+                                  'manufacture_ida':c['manufacture_ida'],
+                                  'typea':c['typea'],
+
+                              'namme':man.name,'phone':man.phone,'email':man.email
+
+
+                        })
+
+            print(l,'llllllllllllllllll')
+       except:
+           pass
+    return JsonResponse({'status':'ok','data':l})
+
+def customer_placeorder(request):
+    return JsonResponse({'status':'ok'})
+
+def customer_makepayment(request):
+    return JsonResponse({'status':'ok'})
+
+def customer_vieworderstatus(request):
+    lid=request.POST['lid']
+    obj=Productsub.objects.filter(PRODUCTSUBORDERMAIN__USER__LOGIN_id=lid)
+    l=[]
+    for i in obj:
+        l.append({'id':i.id,'quantity':i.quantity,
+                  'PRODUCT':i.PRODUCT.name,
+                  'date':i.PRODUCTORDERMAIN.date,'amount':i.PRODUCTORDERMAIN.price,'status':i.PRODUCTORDERMAIN.status})
+        print(i.PRODUCTORDERMAIN.status,'==========')
+    return JsonResponse({'status':'ok','data':l})
+
+
+def customer_sendfeedback(request):
+    lid=request.POST['lid']
+    rating=request.POST['rating']
+
+    obj=Feedback()
+    # obj.type='admin'
+    obj.rating=rating
+    obj.USER=User.objects.get(LOGIN_id=lid)
+    from datetime import datetime
+    obj.date=datetime.now().today()
+    obj.save()
+
+
+    return JsonResponse({'status':'ok'})
+
+def customer_sendcomplaint(request):
+    lid=request.POST['lid']
+    complaint=request.POST['complaint']
+
+    obj=Complaint()
+    from datetime import datetime
+    obj.date=datetime.now().today()
+    obj.complaint=complaint
+    obj.staus='pending'
+    obj.reply='pending'
+    obj.USER=User.objects.get(LOGIN_id=lid)
+    obj.save()
+    return JsonResponse({'status':'ok'})
+
+def customer_viewreply(request):
+    lid=request.POST['lid']
+    obj=Complaint.objects.filter(USER__LOGIN_id=lid)
+    l=[]
+    for i in obj:
+        l.append({'id':i.id,'date':i.date,'complaint':i.complaint,'status':i.status,'reply':i.reply})
+    return JsonResponse({'status':'ok','data':l})
+
+def customer_addtocart(request):
+    lid = request.POST["lid"]
+    pid = request.POST["pid"]
+    Quantity = request.POST["Quantity"]
+    a = Cart()
+    a.quantity = Quantity
+    a.PRODUCT = Sellerproducts.objects.get(id=pid)
+    a.USER = User.objects.get(LOGIN_id=lid)
+    from datetime import datetime
+    a.date=datetime.now().date().today()
+
+    a.save()
+    return JsonResponse({'status': 'ok'})
+
+def user_viewcart(request):
+    lid=request.POST['lid']
+    l = []
+    total=0
+    # for i in res:
+    #     total+=(float(i.PRODUCT.price)*int(i.quantity))
+    #     l.append({'id': i.id, 'Productname': i.PRODUCT.name,'MRP': i.PRODUCT.price,
+    #               'Offerprice': i.PRODUCT.description,'Colour':i.PRODUCT.category,
+    #               'Quantity':i.quantity,'Primarymaterial':i.PRODUCT.unitofmeasurement,'Image':i.PRODUCT.Image})
+    #     print(l)
+    # print(total)
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber, 'bbbbbbbbbbbbbbb')
+    l = []
+    for i in range(blocknumber, 0, -1):
+
+        try:
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            # print(decoded_input[1], 'decoded_input')
+            c = decoded_input[1]
+            man = Manufacture.objects.filter(LOGIN_id=c['manufacture_ida'])
+            res = Cart.objects.filter(USER__LOGIN_id=lid,PRODUCT__PURCHASESUB__product=c['ida'])
+            if res.exists():
+                if Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',
+                                                 PURCHASESUB__product=str(c['ida'])).exists():
+                    selCart = Cart.objects.filter(
+                        PRODUCT__PURCHASESUB__product=str(c['ida']))[0]
+                    # print(selCart)
+                    # if man.exists():
+                    selP = Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',
+                                                         PURCHASESUB__product=str(c['ida']))[0]
+                    total+=(float(selP.saleamount)*int(selCart.quantity))
+                    # man = man[0]
+                    l.append({
+                              'ida': c['ida'],
+                              'id': selCart.id,
+                              'Productname': c['namea'],
+                              'Colour': c['categorya'],
+                              'Offerprice': c['descriptiona'],
+                              'Image': c['specificationa'],
+                              'Primarymaterial': c['unitofmeasurementa'],
+                              'MRP':selP.saleamount,
+                              'manufacture_ida': c['manufacture_ida'],
+                              'typea': c['typea'],
+
+                              # 'namme': man.name, 'phone': man.phone, 'email': man.email
+
+                              })
+
+        except Exception as e:
+            pass
+    print(l)
+    return JsonResponse({'status': "ok", "data": l,"amount":int(total)})
+
+def removefromcart(request):
+    cid=request.POST['cid']
+    print(cid)
+    va=Cart.objects.filter(id=cid).delete()
+    return JsonResponse({'status':'ok'})
+
+
+
+
+
+
+
+def user_makepayment(request):
+    lid=request.POST['lid']
+
+
+    mytotal=0
+    res2 = Cart.objects.filter(USER__LOGIN_id=lid)
+    boj = Productordermain()
+    boj.USER = User.objects.get(LOGIN_id=lid)
+    boj.price = 0
+    boj.status='paid'
+    import datetime
+    boj.date = datetime.datetime.now().date().today()
+    boj.save()
+
+    try:
+        for j in res2:
+            bs = Productsub()
+            bs.PRODUCTORDERMAIN_id = boj.id
+            bs.PRODUCT_id = j.PRODUCT.id
+            bs.quantity = j.quantity
+            bs.save()
+            mytotal += (float(j.PRODUCT.saleamount) * int(j.quantity))
+    except:
+        pass
+    print(mytotal)
+    Cart.objects.filter(USER__LOGIN_id=lid).delete()
+    boj=Productordermain.objects.get(id=boj.id)
+    boj.price=mytotal
+    boj.save()
+    return JsonResponse({'k':'0','status':"ok"})
 
 

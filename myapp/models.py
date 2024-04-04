@@ -111,6 +111,7 @@ class Sellerorder(models.Model):
     paymentmethod=models.CharField(max_length=100)
     paymentstatus=models.CharField(max_length=100)
 
+
 class Customerordermain(models.Model):
     USER = models.ForeignKey(User,on_delete=models.CASCADE)
     date = models.DateField()
@@ -177,12 +178,16 @@ class Purchasesub(models.Model):
 #     status=models.CharField(max_length=100)
 #
 class Sellerproducts(models.Model):
-     sellerid=models.CharField(max_length=250)
-     productname=models.CharField(max_length=250)
-     category=models.CharField(max_length=250)
-     description=models.CharField(max_length=250)
-     modelnumber=models.IntegerField()
-     measurement=models.CharField(max_length=250)
+     PURCHASESUB=models.ForeignKey(Purchasesub, on_delete=models.CASCADE)
+     saleamount=models.FloatField()
+     quantity=models.IntegerField()
+     status=models.CharField(max_length=100)
+
+class Cart(models.Model):
+    date=models.DateTimeField()
+    quantity=models.IntegerField()
+    PRODUCTS=models.ForeignKey(Sellerproducts, on_delete=models.CASCADE)
+    USER=models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Customer(models.Model):
     customername=models.CharField(max_length=100)
@@ -198,6 +203,7 @@ class Productordermain(models.Model):
     orderdate=models.DateField()
     orderstatus=models.CharField(max_length=100)
     price=models.CharField(max_length=100)
+    USER =models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Productsub(models.Model):
     PRODUCTSUBORDERMAIN=models.ForeignKey(Productordermain,on_delete=models.CASCADE)

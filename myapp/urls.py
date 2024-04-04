@@ -40,6 +40,7 @@ urlpatterns = [
     path("approvemanufactureadmin/", views.approvemanufactureadmin),
     path("approvemanufactureadminpost/", views.approvemanufactureadminpost),
     path("rejectmanufactureadmin/", views.rejectmanufactureadmin),
+    path("rejectmanufactureadminpost/", views.rejectmanufactureadminpost),
     path("viewselleradmin/", views.viewselleradmin),
     path("viewselleradminpost/", views.viewselleradminpost),
     path("sellersapprove/<id>", views.sellersapprove),
@@ -49,7 +50,7 @@ urlpatterns = [
     path("rejectselleradmin/", views.rejectselleradmin),
     path("rejectselleradminpost/", views.rejectselleradminpost),
     path("viewcomplaintadmin/", views.viewcomplaintadmin),
-    path("viewcomplaintadminpost/" , views.viewcomplaintadminpost),
+    path("viewcomplaintadminpost/", views.viewcomplaintadminpost),
     path("sendreply/<id>", views.sendreply),
     path("sendreplypost/", views.sendreplypost),
     path("viewfeedback/", views.viewfeedback),
@@ -140,5 +141,24 @@ urlpatterns = [
     path("addproductstosale/", views.addproductstosale),
     path("addproductstosalepost/", views.addproductstosalepost),
     path("sellerhome/", views.sellerhome),
+# customer
+
+    path("customer_signup/", views.customer_signup),
+    path("customer_login/", views.customer_login),
+    path("user_viewcart/", views.user_viewcart),
+    path("customer_sendcomplaint/", views.customer_sendcomplaint),
+    path("customer_viewprofile/", views.customer_viewprofile),
+    path("customer_editprofile/", views.customer_editprofile),
+    path("forgot_password/", views.forgot_password),
+    path("customer_viewproduct/", views.customer_viewproduct),
+    path("customer_placeorder/", views.customer_placeorder),
+    path("customer_makepayment/", views.customer_makepayment),
+    path("customer_vieworderstatus/", views.customer_vieworderstatus),
+    path("customer_sendfeedback/", views.customer_sendfeedback),
+    path("customer_viewreply/", views.customer_viewreply),
+    path("customer_addtocart/", views.customer_addtocart),
+    path("customer_makepayment/", views.customer_makepayment),
+    path("user_makepayment/", views.user_makepayment),
+
 
 ]
