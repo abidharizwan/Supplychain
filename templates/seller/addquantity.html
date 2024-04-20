@@ -1,0 +1,20 @@
+{% extends "seller/sellerindex.html"%}
+{% block body %}
+<form action="/myapp/seller_product_quantity_post/" method="post">
+  <table class="table table-bordered">
+
+{% csrf_token %}
+  <tr>
+    <th scope="row">Quantity</th>
+    <td><input type="number" required class="form-control" name="textfield" id="textfield" /></td>
+  </tr>
+  <input type="hidden" name="id" id="textfield" value="{{ pid }}" />
+  <tr>
+    <th scope="row">&nbsp;</th>
+    <td><input type="submit" name="button" class="btn btn-info" id="button" value="Add" /></td>
+      
+  </tr>
+</table>
+
+</form>
+{% endblock %}

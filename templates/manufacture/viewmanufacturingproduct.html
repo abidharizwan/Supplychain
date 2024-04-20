@@ -1,0 +1,37 @@
+{% extends "manufacture/manufactureindex.html"%}
+{% block body %}
+<form id="form1" name="form1" method="post" action="/myapp/viewmanufactureproductpost/#tab">
+ {% csrf_token %}
+  <table class="pull-left">
+    <tr>
+      <th scope="row"><input type="text" class="form-control" required name="textfield" id="textfield" /></th>
+      <td><input type="submit" name="button" id="button" value="Search" /></td>
+    </tr>
+  </table>
+  <table class="table table-bordered">
+    <tr>
+      <th scope="row">Slno</th>
+      <td>Product name</td>
+      <td>Category</td>
+      <td>Description</td>
+        <td>Specification</td>
+      <td>unit of measurement</td>
+{#      <td>&nbsp;</td>#}
+{#      <td>&nbsp;</td>#}
+    </tr>
+        {% for i in data %}
+      <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>&nbsp;{{ i.namea }}</td>
+      <td>&nbsp;{{ i.categorya }}</td>
+      <td>{{ i.descriptiona }}</td>
+      <td>&nbsp;<img src="{{ i.specificationa }}" height="150px" width="140px"></td>
+      <td>&nbsp;{{ i.unitofmeasurementa }}</td>
+  
+{#      <td><a class="btn btn-outline-info" href="/myapp/managemanufactureproductedit/ {{ i.id }}">edit</a></td>#}
+{#      <td><a class="btn btn-outline-danger" href="/myapp/manufactureproductdelete/{{ i.id }}">delete</a></td>#}
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+{% endblock %}

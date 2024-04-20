@@ -1,0 +1,30 @@
+{% extends "manufacture/manufactureindex.html"%}
+{% block body %}
+{% load filters %}
+<form action="/myapp/manufacturer_viewordersubpost/#tab" method="post"><table class="pull-left">
+    {% csrf_token %}
+  <tr>
+    <th scope="row"><input type="text" required class="form-control" name="textfield" id="textfield" /></th>
+    <td><input type="submit" class="btn btn-info" name="button" id="button" value="Search" /></td>
+  </tr>
+</table>
+  <table class="table table-bordered">
+    <tr>
+      <th scope="row">Sl.no</th>
+      <td>Amount</td>
+      <td>Material</td>
+      <td>Quantity</td>
+    </tr>
+      {% for i in data %}
+          {% if search|lower in i.RAWMATERIAL_id|material_info:'namea'|lower %}
+    <tr>
+        <th scope="row">&nbsp;{{ forloop.counter }}</th>
+        <td>&nbsp;{{ i.RAWMATERIALORDERMAIN.amount }}</td>
+        <td>&nbsp;{{ i.RAWMATERIAL_id|material_info:'namea' }}</td>
+        <td>&nbsp;{{ i.quantity }}</td>
+    </tr>
+          {% endif %}
+      {% endfor %}
+  </table>
+</form>
+{% endblock %}
