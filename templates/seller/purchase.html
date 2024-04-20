@@ -1,26 +1,29 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="" method="post"><table class="pull-left">
+{% load filters %}
+<form action="" method="post"><table class="table table-bordered table-hover">
     <tr>
      
       <td>Slno</td>
+      <td>Date</td>
       <td>Product Name</td>
-      <td>Product</td>
       <td>Quantity</td>
-        
-      <td>&nbsp;</td>
+      <td>Manufacture</td>
     </tr>
     {% for i in data %}
         <tr>
           <th scope="row">&nbsp;{{ forloop.counter }}</th>
-          <td>&nbsp;{{ i.manufacture }}</td>
-          <td>&nbsp;{{ i.PRODUCT.productname }}</td>
-          <td>&nbsp;{{ i.PRODUCT.productname }}</td>
-          
-          
-          <td>&nbsp;</td>
-          <td><a class="btn btn-outline-info" href="/myapp/viewpurchasesub/{{ i.id }}">Purchase</a></td>
-     {% endfor %}       
+          <td>&nbsp;{{ i.SELLERORDERMAIN.date }}</td>
+          <td>&nbsp;{{ i.MANUFACTUREPRODUCT_id|product_info:'namea' }}</td>
+          <td>&nbsp;{{ i.quantity }}</td>
+          <td>&nbsp;{{ i.MANUFACTUREPRODUCT_id|product_info:'manufacture_ida' }}</td>
+          <td>{% if i.id in spr %}
+              Exists in products list
+              {% else %}
+              <a href="/myapp/addproductstosale/{{ i.id }}#tab" class="btn btn-success" onclick="return confirm('Are you sure?')">Add For Sale</a>
+
+          {% endif %}</td>
+     {% endfor %}
         </tr>
   </table>
 </form>

@@ -1,33 +1,35 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form action="" method="post"><table class="pull-left">
+{% load filters %}
+<form action="/myapp/viewsellerorderandverifypost/#tab" method="post"><table class="pull-left">
   <tr>
-    <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
+    <th scope="row">From</th>
+    <th scope="row"><input type="date" required class="form-control" name="textfield" id="textfield" /></th>
+    <th scope="row">To</th>
+    <th scope="row"><input type="date" required class="form-control" name="textfield2" id="textfield" /></th>
     <td><input type="submit" name="button" class="btn btn-info" id="button" value="Search" /></td>
   </tr>
 </table><table class="table table-bordered">
   <tr>
-    <th scope="row">Sl.no</th>
-    <td>orderdate</td>
-    <td>deliveryaddress</td>
-    <td>status</td>
-    <td>total quantity</td>
-    <td>paymentmethod</td>
-    <td>paymentstatus</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
+    <th >Sl.no</th>
+    <td>Date</td>
+    <td>Seller Name</td>
+{#    <td>Amount</td>#}
+    <th>&nbsp;Status</th>
   </tr>
     {% for i in data %}
   <tr>
-    <th scope="row">&nbsp;{{ forloop.counter }}</th>
-    <td>&nbsp;{{ i.orderdate }}</td>
-    <td>&nbsp;{{ i.address }}</td>
-    <td>&nbsp;{{ i.status }}</td>
-    <td>&nbsp;{{ i.totalquantity }}</td>
-    <td>&nbsp;{{ i.paymentmethod }}</td>
-    <td>&nbsp;{{ i.paymentstatus }}</td>
-    <td><a class="btn btn-outline-info" href="/myapp/viewsellerorderandverify/">verify</a></td>
-    <td>&nbsp;</td>
+    <th>&nbsp;{{ forloop.counter }}</th>
+    <td>&nbsp;{{ i.date }}</td>
+    <td>&nbsp;{{ i.SELLER.username }}</td>
+{#    <td>&nbsp;{{ i.amount }}</td>#}
+    <td>{% if i.status == 'pending' or i.status == 'ordered' %}
+    <a class="btn btn-primary" href="/myapp/viewseller_suborder/{{ i.id }}#tab">Products</a>
+    <a class="btn btn-outline-info" href="/myapp/approvesellerorder/{{ i.id }}#tab">verify</a>
+    <a class="btn btn-outline-danger" href="/myapp/rejectsellerorder/{{ i.id }}#tab">reject</a>
+        {% else %}
+        {{ i.status }}
+    {% endif %}</td>
       {% endfor %}
   </tr>
 </table>

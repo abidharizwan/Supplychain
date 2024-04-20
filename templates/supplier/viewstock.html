@@ -1,6 +1,6 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/viewstockpost/" method="post"><table class="pull-left">
+<form action="/myapp/viewstockpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
@@ -17,10 +17,10 @@
       {% for i in data %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td>&nbsp;{{ i.quantity }}</td>
-      <td>&nbsp;{{ i.RAWMATERIAL.name }}</td>
-      <td><a class="btn-outline-info" href="/myapp/editstocksupplier/{{ i.id }}">edit</a></td>
-      <td><a class="btn-outline-danger" href="/myapp/deletestocksupplier/{{ i.id }}">delete</a></td>
+      <td>&nbsp;{{ i.stk }}</td>
+      <td>&nbsp;{{ i.namea }}</td>
+{#      <td><a class="btn-outline-info" href="/myapp/editstocksupplier/{{ i.id }}">edit</a></td>#}
+      <td><a class="btn-outline-danger" href="/myapp/deletestocksupplier/{{ i.id }}#tab">delete</a></td>
     </tr>
       {% endfor %}
   </table>

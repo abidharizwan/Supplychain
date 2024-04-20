@@ -1,11 +1,22 @@
+import datetime
+import json
 import smtplib
 
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from web3 import *
 
 from myapp.models import *
+from sam1 import settings
 
+blockchain_address = 'HTTP://127.0.0.1:7545'
+web3 = Web3(HTTPProvider(blockchain_address))
+web3.eth.defaultAccount = web3.eth.accounts[0]
+
+compiled_contract_path = settings.STATIC_ROOT+'\\blocks\\build\\contracts\\supply.json'
+# deployed_contract_addressa = '0x2F5fCdCdc1EA4322AEA9cf6e9B0a40560F0baD95'
+deployed_contract_addressa = web3.eth.accounts[4]
 
 # Create your views here.
 
@@ -303,7 +314,7 @@ def editsupplierpost(request):
 
     obj=Supplier.objects.get(LOGIN_id=request.session['lid'])
     if 'textfield7' in request.FILES:
-        logo = request.POST['textfield7']
+        logo = request.FILES['textfield7']
         from datetime import datetime  # for the logo images
         date1 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
         fs1 = FileSystemStorage()
@@ -312,15 +323,15 @@ def editsupplierpost(request):
         obj.logo = path1
         obj.save()
 
-    obj = Supplier.objects.get(LOGIN_id=request.session['lid'])
+
     if 'textfield8' in request.FILES:
-        certification = request.FILES['textfield8']
+        certificate = request.FILES['textfield8']
         from datetime import datetime  # for the logo images
         date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
         fs2 = FileSystemStorage()
-        fn2 = fs2.save(date2, certification)
+        fn2 = fs2.save(date2, certificate)
         path2 = fs2.url(date2)
-        obj.certificate = path2
+        obj.certification = path2
         obj.save()
 
     obj.companyname=name
@@ -330,7 +341,7 @@ def editsupplierpost(request):
     obj.location=location
     obj.industry=industry
     obj.save()
-    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewprofilesupplier/'</script>''')
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewprofilesupplier/#tab'</script>''')
 
 
 
@@ -345,7 +356,16 @@ def managerawmaterialsaddsupplierpost(request):
     harvestorproductiondate=request.POST['harvest']
     cost=request.POST['cost']
     quantity=request.POST['quantity']
-    certification=request.POST['certificate']
+    certification=request.FILES['certificate']
+
+
+    from datetime import datetime
+    date='raw_materials/'+datetime.now().strftime('%Y%m%d-%H%M%S')+".jpg"
+    fs=FileSystemStorage()
+    fs.save(date,certification)
+    path=fs.url(date)
+
+
 
     obj=Rawmaterials() #add datas
     obj.name=name
@@ -354,21 +374,101 @@ def managerawmaterialsaddsupplierpost(request):
     obj.origin=origin
     obj.harvestorproductiondate=harvestorproductiondate
     obj.cost=cost
-    obj.quantity=quantity
-    obj.certification=certification
+    obj.quantityavailable=quantity
+    obj.certification=path
     obj.SUPPLIER=Supplier.objects.get(LOGIN_id=request.session['lid']) #for foreign key
-    obj.save()
+
+    with open(compiled_contract_path)as file:
+        contract_json = json.load(file)
+        contract_abi = contract_json['abi']
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    message2 = contract.functions.addmaterials(int(blocknumber),
+                                              str(name),
+                                              str(category),
+                                              str(description),
+                                              str(request.session['lid']),
+                                              str(origin),
+                                              str(harvestorproductiondate),
+                                              str(path),
+                                              str(cost),
+                                              str(quantity),
+                                              str('rawmaterial')
+                                              ).transact({'from': web3.eth.accounts[0]})
     return HttpResponse('''<script>alert('added ');window.location='/myapp/supplierhome/'</script>''')
 
 
 def viewrawmaterialsedit(request):
-    obj = Rawmaterials.objects.filter(SUPPLIER__LOGIN_id=request.session['lid'])
-    return render(request,'supplier/viewrawmaterials.html',{'data':obj})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            c= decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['suppliera']) == int(request.session['lid']):
+                l.append({'ida':c['ida'],
+                              'namea':c['namea'],
+                              'categorya':c['categorya'],
+                              'descriptiona':c['descriptiona'],
+                              'suppliera':c['suppliera'],
+                              'quantitya':c['quantitya'],
+                              'origina':c['origina'],
+                              'costa':c['costa'],
+                              'productiondatea':c['productiondatea'],
+                              'certificatea':c['certificatea']})
+       except:
+           pass
+    return render(request,'supplier/viewrawmaterials.html',{'data':l})
 
 def viewrawmaterialspost(request):
-    search=request.POST['textfield']
-    obj = Rawmaterials.objects.filter(SUPPLIER__LOGIN_id=request.session['lid'],name__icontains=search)
-    return render(request, 'supplier/viewrawmaterials.html', {'data': obj})
+    obj = request.POST['textfield']
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l = []
+    for i in range(blocknumber, 0, -1):
+
+        try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c = decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['suppliera']) == int(request.session['lid']):
+                if str(obj).lower() in str(c['namea']).lower():
+                    l.append({'ida': c['ida'],
+                              'namea': c['namea'],
+                              'categorya': c['categorya'],
+                              'descriptiona': c['descriptiona'],
+                              'suppliera': c['suppliera'],
+                              'quantitya': c['quantitya'],
+                              'origina': c['origina'],
+                              'costa': c['costa'],
+                              'productiondatea': c['productiondatea'],
+                              'certificatea': c['certificatea']})
+        except:
+            pass
+    return render(request, 'supplier/viewrawmaterials.html', {'data': l})
 
 def editrawmaterials(request,id):
     obj=Rawmaterials.objects.get(id=id)
@@ -379,20 +479,32 @@ def editrawmaterialspost(request):
     category=request.POST['category']
     description=request.POST['description']
     origin=request.POST['origin']
-    harvestorproductiondate=request.POST['harvestorproductiondate']
-    certification=request.POST['certification']
+    harvestorproductiondate=request.POST['harvest']
     cost=request.POST['cost']
-    quantityavailable=request.POST['quantityavailable']
+    quantityavailable=request.POST['quantity']
+    id=request.POST['id']
 
-    obj = Rawmaterials()  # edit datas
+    obj = Rawmaterials.objects.get(id=id)  # edit datas
+
+    if 'certification' in request.FILES:
+        certification = request.FILES['certification']
+
+        from datetime import datetime
+        date = datetime.now().strftime('%Y%m%d-%H%M%S') + ".jpg"
+        fs = FileSystemStorage()
+        fs.save(date, certification)
+        path = fs.url(date)
+
+        obj.certification = path
+        obj.save()
+
     obj.name = name
     obj.category = category
     obj.description = description
     obj.origin = origin
     obj.harvestorproductiondate = harvestorproductiondate
     obj.cost = cost
-    obj.quantity = quantityavailable
-    obj.certification = certification
+    obj.quantityavailable = quantityavailable
     obj.SUPPLIER = Supplier.objects.get(LOGIN_id=request.session['lid'])  # for foreign key
     obj.save()
     return HttpResponse('''<script>alert('editted ');window.location='/myapp/viewrawmaterialsedit/'</script>''')
@@ -403,36 +515,193 @@ def deleterawmaterials(request,id):
     return HttpResponse('''<script>alert('deleted ');window.location='/myapp/viewrawmaterialsedit/'</script>''')
 
 
+def delete_rawmaterials(request,id):
+    obj=Rawmaterials.objects.get(id=id).delete()
+    return HttpResponse('''<script>alert('deleted');window.location='/myapp/viewrawmaterialsedit/'</script>''')
+
+
 def viewstock(request):
-    obj=Stockrawmaterial.objects.all()
-    return render(request, 'supplier/viewstock.html',{'data':obj})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l = []
+    for i in range(blocknumber, 0, -1):
+
+        try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c = decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['suppliera']) == int(request.session['lid']):
+
+                s = Stockrawmaterial.objects.filter(RAWMATERIAL_id=c['ida'])
+
+                if s.exists():
+                    l.append({'ida': c['ida'],
+                              'id': s[0].id,
+                              'namea': c['namea'],
+                              'categorya': c['categorya'],
+                              'descriptiona': c['descriptiona'],
+                              'suppliera': c['suppliera'],
+                              'quantitya': c['quantitya'],
+                              'origina': c['origina'],
+                              'costa': c['costa'],
+                              'productiondatea': c['productiondatea'],
+                              'certificatea': c['certificatea'],
+                              'stk': s[0].quantity,
+                              })
+
+                else:
+                    l.append({'ida': c['ida'],
+                              'id': s[0].id,
+                              'namea': c['namea'],
+                              'categorya': c['categorya'],
+                              'descriptiona': c['descriptiona'],
+                              'suppliera': c['suppliera'],
+                              'quantitya': c['quantitya'],
+                              'origina': c['origina'],
+                              'costa': c['costa'],
+                              'productiondatea': c['productiondatea'],
+                              'certificatea': c['certificatea'],
+                              'stk': '0',
+                              })
+
+        except:
+            pass
+    return render(request, "supplier/viewstock.html", {'data': l})
+
 
 def viewstockpost(request):
     search=request.POST['textfield']
-    obj = Stockrawmaterial.objects.filter(RAWMATERIAL__name=search)
-    return render(request, 'supplier/viewstock.html', {'data': obj})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l = []
+    for i in range(blocknumber, 0, -1):
+
+        try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c = decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['suppliera']) == int(request.session['lid']):
+
+                s = Stockrawmaterial.objects.filter(RAWMATERIAL_id=c['ida'])
+                if str(search).lower() in str(c['namea']).lower():
+
+                    if s.exists():
+                        l.append({'ida': c['ida'],
+                                  'id': s[0].id,
+                                  'namea': c['namea'],
+                                  'categorya': c['categorya'],
+                                  'descriptiona': c['descriptiona'],
+                                  'suppliera': c['suppliera'],
+                                  'quantitya': c['quantitya'],
+                                  'origina': c['origina'],
+                                  'costa': c['costa'],
+                                  'productiondatea': c['productiondatea'],
+                                  'certificatea': c['certificatea'],
+                                  'stk': s[0].quantity,
+                                  })
+                        print(l)
+
+                    else:
+                        l.append({'ida': c['ida'],
+                                  'id': s[0].id,
+                                  'namea': c['namea'],
+                                  'categorya': c['categorya'],
+                                  'descriptiona': c['descriptiona'],
+                                  'suppliera': c['suppliera'],
+                                  'quantitya': c['quantitya'],
+                                  'origina': c['origina'],
+                                  'costa': c['costa'],
+                                  'productiondatea': c['productiondatea'],
+                                  'certificatea': c['certificatea'],
+                                  'stk': '0',
+                                  })
+
+        except:
+            pass
+    return render(request, "supplier/viewstock.html", {'data': l})
+
 
 
 def addstocksupplier(request):
-    obj=Rawmaterials.objects.all()
-    return render(request, 'supplier/addstock.html', {'data':obj})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            c= decoded_input[1]
+            if int(c['suppliera']) == int(request.session['lid']):
+                l.append({'id':c['ida'],
+                      'name':c['namea'],
+                      })
+       except:
+           pass
+    return render(request, 'supplier/addstock.html', {'data':l})
 
 def addstocksupplierpost(request):
     quantity=request.POST['textfield']
     rawmaterial=request.POST['textfield2']
-
     obj = Stockrawmaterial()
+    if Stockrawmaterial.objects.filter(RAWMATERIAL_id=rawmaterial).exists():
+        obj = Stockrawmaterial.objects.filter(RAWMATERIAL_id=rawmaterial)[0]
     obj.quantity = quantity
     obj.RAWMATERIAL_id = rawmaterial  # for foreign key
+    obj.SUPPLIER = Supplier.objects.get(LOGIN_id=request.session['lid'])  # for foreign key
     obj.save()
-    return HttpResponse('''<script>alert('stock added ');window.location='/myapp/supplierhome/'</script>''')
+    return HttpResponse('''<script>alert('stock added ');window.location='/myapp/viewstock/'</script>''')
 
 
 
 def editstocksupplier(request,id):
     obj1 = Stockrawmaterial.objects.get(id=id)
-    obj = Rawmaterials.objects.all()
-    return render(request, 'supplier/editstock.html', {'data': obj,'data1':obj1})
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            c= decoded_input[1]
+            if int(c['suppliera']) == int(request.session['lid']):
+                l.append({'id':c['ida'],
+                      'name':c['namea'],
+                      })
+       except:
+           pass
+    return render(request, 'supplier/editstock.html', {'data': l,'data1':obj1})
 
 
 def editstocksupplierpost(request):
@@ -458,19 +727,22 @@ def viewordersfrommanufacture(request):
     return render(request,'supplier/viewordersfrommanufacture.html', {'data':obj})
 
 def viewordersfrommanufacturepost(request):
-    search = request.POST['textfield']
-    obj=Rawmaterialordermain.objects.filter(MANUFACTURE__name=search)
+    fromdate = request.POST['textfield']
+    todate = request.POST['textfield2']
+    obj =Rawmaterialordermain.objects.filter(date__range=[fromdate, todate])
     return render(request, 'supplier/viewordersfrommanufacture.html', {'data': obj})
 
 
-def viewordersub(request,id):
+def viewordersubsupplier(request,id):
     obj=Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN=id)
-    return render(request, 'supplier/ordersubsupplier.html', {'data':obj})
+    request.session['osmids'] = id
+    return render(request, 'supplier/ordersubsupplier.html', {'data':obj, 'search':''})
 
 def viewordersubpost(request):
     search = request.POST['textfield']
-    obj = Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN__amount=search)
-    return render(request, 'supplier/ordersubsupplier.html', {'data': obj})
+    id = request.session['osmids']
+    obj = Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN_id=id)
+    return render(request, 'supplier/ordersubsupplier.html', {'data': obj, 'search':search})
 
 def updateorderstatussupplier(request,id):
     obj=Rawmaterialordermain.objects.filter(pk=id).update(status='updated')
@@ -552,7 +824,7 @@ def changepasswordmanufacturepost(request):
     Oldpassword=request.POST['textfield']
     Newpassword=request.POST['textfield2']
     Confirmpassword=request.POST['textfield3']
-    log=Login.objects.filter(password=Oldpassword)  #take old password
+    log=Login.objects.filter(password=Oldpassword,id=request.session['lid'])  #take old password
     if log.exists(): #check oldpassword and enteringpassword are same or not
         log1=Login.objects.get(password=Oldpassword,id=request.session['lid']) # retrieving a single record from the Login model/table where both the password matches a specific value (Oldpassword) and the id matches a value stored in the session variable 'lid'.
         if Newpassword==Confirmpassword:
@@ -561,10 +833,9 @@ def changepasswordmanufacturepost(request):
 
             return HttpResponse('''<script>alert('login successfull');window.location='/myapp/loginadmin/'</script>''')
         else:
-            return HttpResponse('''<script>alert('invalid');window.location='/myapp/changepasswordadmin/'</script>''')
+            return HttpResponse('''<script>alert('invalid');history.back()</script>''')
     else:
-        return HttpResponse('''<script>alert('invalid');window.location='/myapp/changepasswordadmin/'</script>''')
-
+        return HttpResponse('''<script>alert('invalid');history.back()</script>''')
 
 
 def viewprofilemanufacture(request):
@@ -581,8 +852,6 @@ def manufactureeditprofilepost(request):
     phone=request.POST['textfield3']
     website=request.POST['textfield4']
     location=request.POST['textfield5']
-    registrationdate=request.POST['textfield6']
-    status=request.POST['textfield7']
 
 
     obj=Manufacture.objects.get(LOGIN_id=request.session['lid'])
@@ -603,7 +872,7 @@ def manufactureeditprofilepost(request):
         fs2 = FileSystemStorage()
         fn2 = fs2.save(date2, certification)
         path2 = fs2.url(date2)
-        obj.certificate = path2
+        obj.certification = path2
         obj.save()
 
     obj.name=name
@@ -611,10 +880,8 @@ def manufactureeditprofilepost(request):
     obj.phone=phone
     obj.website=website
     obj.location=location
-    obj.registrationdate=registrationdate
-    obj.status=status
     obj.save()
-    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewprofilemanufacture/'</script>''')
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/manufactureeditprofile/'</script>''')
 
 
 
@@ -629,14 +896,21 @@ def viewsupplierpost(request):
 
 
 
-def viewrawmaterialsandsendorder(request,id):
-    obj=Stockrawmaterial.objects.filter(RAWMATERIAL=id)
-    return render(request, 'manufacture/viewrawmaterial&sendorder.html',{'data':obj})
+def viewrawmaterialsandsendorder(request,slid):
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+    obj = Stockrawmaterial.objects.filter(SUPPLIER__LOGIN_id=slid)
+    return render(request, 'manufacture/viewrawmaterial&sendorder.html',{'data':obj, 'slid': slid, 'search': ''})
 
 def viewrawmaterialsandsendorderpost(request):
     search = request.POST['textfield']
-    obj = Stockrawmaterial.objects.filter(RAWMATERIAL_name=search)
-    return render(request, 'manufacture/viewrawmaterial&sendorder.html', {'data': obj})
+    slid = request.POST['slid']
+    obj = Stockrawmaterial.objects.filter(SUPPLIER__LOGIN_id=slid)
+    return render(request, 'manufacture/viewrawmaterial&sendorder.html', {'data': obj, 'slid': slid, 'search': search})
+
+def quantity(request,id, cost):
+    request.session['mcost'] = cost
+    return render(request,'manufacture/addquantity.html',{'id':id})
 
 def orderrawmaterial(request):
     rid=request.POST['id']
@@ -644,8 +918,8 @@ def orderrawmaterial(request):
     obj=Rawmaterialordermain()
     import datetime
     obj.date=datetime.datetime.now().date()
-    obj.amount=0
-    obj.status='paid'
+    obj.amount=float(request.session['mcost'])*float(quantity)
+    obj.status='ordered'
     obj.MANUFACTURE=Manufacture.objects.get(LOGIN_id=request.session['lid'])
     obj.save()
     r=Rawmaterialoredrsub()
@@ -654,39 +928,174 @@ def orderrawmaterial(request):
     r.quantity=quantity
     r.save()
 
-    return HttpResponse('''<script>alert('order placed ');window.location='/myapp/viewsupplier/'</script>''')
-
-def quantity(request,id):
-    return render(request,'manufacture/addquantity.html',{'id':id})
-
-def viewmanufactureproduct(request):
-    return render(request, 'manufacture/editdeletemanufacturingproduct.html')
-
-def viewmanufactureproductpost(request):
-    obj = Manufacture.objects.all()
-    return render(request, 'manufacture/editdeletemanufacturingproduct.html', {'obj': obj})
+    return HttpResponse('''<script>alert('order placed ');window.location='/myapp/viewsupplier/#tab'</script>''')
 
 
+def viewrawmaterialsorder(request):
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+    res = Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN__MANUFACTURE__LOGIN_id=request.session['lid'])
+    l = []
+    ex = []
+    for i in res:
+        if i.RAWMATERIALORDERMAIN.id in ex:
+            continue
+        ex.append(i.RAWMATERIALORDERMAIN.id)
+        l.append({
+            'id':i.RAWMATERIALORDERMAIN.id,
+            'name': i.RAWMATERIAL_id,
+            'date': i.RAWMATERIALORDERMAIN.date,
+            'amount': i.RAWMATERIALORDERMAIN.amount,
+            'status': i.RAWMATERIALORDERMAIN.status,
+        })
+    return render(request,'Manufacture/vieworders to supplier.html', {'data':l})
 
-def managemanufactureproductadd(request):
-    return render(request, 'manufacture/addmanufacturingproduct.html')
+def viewrawmaterialsorderpost(request):
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+    fro_=request.POST['textfield']
+    to_=request.POST['textfield2']
+    res = Rawmaterialoredrsub.objects.filter(
+        RAWMATERIALORDERMAIN__MANUFACTURE__LOGIN_id=request.session['lid'],
+        RAWMATERIALORDERMAIN__date__range=[fro_, to_],)
+    l = []
+    ex = []
+    for i in res:
+        if i.RAWMATERIALORDERMAIN.id in ex:
+            continue
+        ex.append(i.RAWMATERIALORDERMAIN.id)
+        l.append({
+            'id':i.RAWMATERIALORDERMAIN.id,
+            'name': i.RAWMATERIAL_id,
+            'date': i.RAWMATERIALORDERMAIN.date,
+            'amount': i.RAWMATERIALORDERMAIN.amount,
+            'status': i.RAWMATERIALORDERMAIN.status,
+        })
+    return render(request,'Manufacture/vieworders to supplier.html', {'data':l})
 
-def managemanufactureproductaddpost(request):
+
+def manufacturer_viewordersub(request,id):
+    request.session['osmid'] = id
+    obj=Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN=id)
+    return render(request, 'manufacture/ordersubsupplier.html', {'data': obj, 'search':''})
+
+def manufacturer_viewordersubpost(request):
+    search = request.POST['textfield']
+    id = request.session['osmid']
+    obj = Rawmaterialoredrsub.objects.filter(RAWMATERIALORDERMAIN_id=id)
+    return render(request, 'manufacture/ordersubsupplier.html', {'data': obj, 'search':search})
+
+
+def addmanufacturingproduct(request):
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+
+    return render(request,'Manufacture/Addmanufacturingproduct.html')
+
+def addmanufacturingproductpost(request):
     name=request.POST['textfield']
     category=request.POST['textfield2']
     description=request.POST['textfield3']
-    specification=request.POST['textfield4']
+    specification=request.FILES['textfield4']
     unitofmeasurement=request.POST['textfield5']
 
-    obj = Manufactureproducts()     #add products
-    obj.productname=name
-    obj.category=category
-    obj.description=description
-    obj.specification=specification
-    obj.unitofmeasurement=unitofmeasurement
-    obj.MANUFACTUREID =Manufacture.objects.get(LOGIN_id=request.session['lid']) # for foreign key
-    obj.save()
-    return HttpResponse('''<script>alert('product added ');window.location='/myapp/viewmanufactureproduct/'</script>''')
+    from datetime import datetime
+    date1 = 'products/'+datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'
+    fs1 = FileSystemStorage()
+    fs1.save(date1, specification)
+    path1 = fs1.url(date1)
+    from datetime import datetime
+    with open(compiled_contract_path)as file:
+        contract_json = json.load(file)
+        contract_abi = contract_json['abi']
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    message2 = contract.functions.addmproduct(int(blocknumber), str(name), str(category), str(description), str(path1),
+                                               str(unitofmeasurement),str(request.session['lid']), str('mproduct')).transact(
+        {'from': web3.eth.accounts[0]})
+
+
+
+    return HttpResponse('''<script>alert('Added Successfully');window.location='/myapp/addmanufacturingproduct/#tab'</script>''')
+
+def viewmanufactureproduct(request):
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c= decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['manufacture_ida']) == int(request.session['lid']):
+
+
+                l.append({'ida':c['ida'],
+                          'namea':c['namea'],
+                          'categorya':c['categorya'],
+                          'descriptiona':c['descriptiona'],
+                          'specificationa':c['specificationa'],
+                          'unitofmeasurementa':c['unitofmeasurementa'],
+                          'manufacture_ida':c['manufacture_ida'],
+                          'typea':c['typea']
+                    })
+       except:
+           pass
+    return render(request, 'Manufacture/viewmanufacturingproduct.html',{'data':l})
+
+def viewmanufactureproductpost(request):
+    name = request.POST['textfield']
+    if request.session['lid']=="":
+        return HttpResponse('''<script>alert('Login required');window.location='/myapp/login/'</script>''')
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c= decoded_input[1]
+            # if c['typea'] == 'request':
+
+            if int(c['manufacture_ida']) == int(request.session['lid']):
+                if str(name).lower() in str(c['namea']):
+                    l.append({
+                            'ida':c['ida'],
+                            'namea':c['namea'],
+                            'categorya':c['categorya'],
+                            'descriptiona':c['descriptiona'],
+                            'specificationa':c['specificationa'],
+                            'unitofmeasurementa':c['unitofmeasurementa'],
+                            'manufacture_ida':c['manufacture_ida'],
+                            'typea':c['typea']
+                            })
+       except:
+           pass
+    return render(request, 'Manufacture/viewmanufacturingproduct.html',{'data':l})
 
 
 
@@ -706,7 +1115,7 @@ def managemanufactureproducteditpost(request):
     obj.specification=specification
     obj.MANUFACTUREID = Manufacture.objects.get(LOGIN_id=request.session['lid'])
     obj.save()
-    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewmanufactureproduct/'</script>''')
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewmanufactureproduct/#tab'</script>''')
 
 def manufactureproductdelete(request,id):
     obj = Manufactureproducts.objects.get(id=id).delete
@@ -714,12 +1123,26 @@ def manufactureproductdelete(request,id):
 
 
 def viewsellerorderandverify(request):
-    return render(request, 'manufacture/viewsellersorder&verify.html')
+    res = Sellerordermain.objects.filter()
+    return render(request, 'manufacture/viewsellersorder&verify.html', {'data':res})
+
+def approvesellerorder(request, id):
+    res = Sellerordermain.objects.filter(id=id).update(status='approved')
+    return HttpResponse('''<script>alert('Approved ');window.location='/myapp/viewsellerorderandverify/'</script>''')
+
+def rejectsellerorder(request, id):
+    res = Sellerordermain.objects.filter(id=id).update(status='rejected')
+    return HttpResponse('''<script>alert('Rejected ');window.location='/myapp/viewsellerorderandverify/'</script>''')
 
 def viewsellerorderandverifypost(request):
-    obj = Manufacture.objects.all()
-    return render(request, 'manufacture/viewsellersorder&verify.html', {'obj': obj})
+    fro_ = request.POST['textfield']
+    to_ = request.POST['textfield2']
+    res = Sellerordermain.objects.filter(date__range=[fro_, to_])
+    return render(request, 'manufacture/viewsellersorder&verify.html', {'data':res})
 
+def viewseller_suborder(request, id):
+    res = Sellerordersub.objects.filter(SELLERORDERMAIN_id=id)
+    return render(request, 'manufacture/view seller sub orders.html', {'data':res})
 
 
 def manufacturehome(request):
@@ -801,11 +1224,11 @@ def editsellerpost(request):
     obj = Seller.objects.get(LOGIN_id=request.session['lid'])
 
     if 'textfield6' in request.FILES:
-        certification = request.FILES['textfield6']
+        certificate = request.FILES['textfield6']
         from datetime import datetime  # for the logo images
         date2 = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'  # year,month,date,hour,minute,second
         fs2 = FileSystemStorage()
-        fn2 = fs2.save(date2, certification)
+        fn2 = fs2.save(date2, certificate)
         path2 = fs2.url(date2)
         obj.certificate = path2
         obj.save()
@@ -816,13 +1239,10 @@ def editsellerpost(request):
     obj.website = website
     obj.location = location
     obj.save()
-    return HttpResponse('''<script>alert('edited ');window.location='/myapp/sellerhome/'</script>''')
-
-
+    return HttpResponse('''<script>alert('edited ');window.location='/myapp/viewandeditprofile/#tab'</script>''')
 
 def viewcustomerorder(request):
     obj = Customerordermain.objects.all()
-
     return render(request,'seller/viewcustomerorder.html',{'data':obj})
 
 def viewcustomerorderpost(request):
@@ -835,7 +1255,7 @@ def viewcustomerorderpost(request):
 
 
 def viewordersub(request,id):
-    obj = Customerordersub.objects.filter(CUSTOMERORDERMAIN=id)
+    obj = Customerordersub.objects.filter(CUSTOMERORDERMAIN_id=id)
 
     return render(request, 'seller/viewcustomerordersub.html', {'data': obj})
 
@@ -879,28 +1299,119 @@ def viewrejectedcustomerorderpost(request):
     return render(request, 'seller/viewrejectedcustomerorder.html', {'data': obj})
 
 def viewmanufacture(request):
-    obj = Manufacture.objects.all()
+    obj = Manufacture.objects.filter(status='approved')
     return render(request, 'seller/viewmanufacture.html', {'data':obj})
 
 def viewmanufacturepost(request):
    search = request.POST['textfield']
-   obj = Manufacture.objects.filter(name__icontains=search)
+   obj = Manufacture.objects.filter(name__icontains=search, status='approved')
    return render(request,'seller/viewmanufacture.html', {'data':obj})
 
-def viewmanufacturingproducts(request):
-    obj = Manufactureproducts.objects.all()
-    return render(request, 'seller/viewmanufacturingproducts.html',{'data':obj})
+def viewmanufacturingproducts(request, id):
+    request.session['manLid'] = id
 
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c= decoded_input[1]
+
+            if int(c['manufacture_ida']) == int(id):
+
+
+                l.append({'ida':c['ida'],
+                          'namea':c['namea'],
+                          'categorya':c['categorya'],
+                          'descriptiona':c['descriptiona'],
+                          'specificationa':c['specificationa'],
+                          'unitofmeasurementa':c['unitofmeasurementa'],
+                          'manufacture_ida':c['manufacture_ida'],
+                          'typea':c['typea']
+                    })
+       except:
+           pass
+    return render(request, 'seller/viewmanufacturingproducts.html',{'data':l})
 
 def viewmanufacturingproductspost(request):
     search = request.POST['textfield']
-    obj = Manufactureproducts.objects.filter(productname__icontains=search)
-    return render(request, 'seller/viewmanufacturingproducts.html', {'data':obj})
+    id = request.session['manLid']
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+
+    blocknumber = web3.eth.get_block_number()
+    print(blocknumber)
+
+    l=[]
+    for i in range(blocknumber,0, -1):
+
+       try:
+
+            a = web3.eth.get_transaction_by_block(i, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            print(decoded_input[1])
+            c= decoded_input[1]
+
+            if int(c['manufacture_ida']) == int(id):
+                if str(search).lower() in str(c['namea']).lower():
+                    l.append({'ida':c['ida'],
+                          'namea':c['namea'],
+                          'categorya':c['categorya'],
+                          'descriptiona':c['descriptiona'],
+                          'specificationa':c['specificationa'],
+                          'unitofmeasurementa':c['unitofmeasurementa'],
+                          'manufacture_ida':c['manufacture_ida'],
+                          'typea':c['typea']
+                    })
+       except:
+           pass
+    return render(request, 'seller/viewmanufacturingproducts.html',{'data':l})
+
+def seller_product_quantity(request, id):
+    return render(request, 'seller/addquantity.html', {'pid': id})
+
+def seller_product_quantity_post(request):
+    pid = request.POST['id']
+    q = request.POST['textfield']
+    date = datetime.date.today()
+
+    sor = Sellerordermain()
+    sor.date = date
+    sor.SELLER = Seller.objects.get(LOGIN_id=request.session['lid'])
+    sor.status = 'ordered'
+    sor.save()
+
+    sos = Sellerordersub()
+    sos.MANUFACTUREPRODUCT_id = pid
+    sos.quantity = q
+    sos.SELLERORDERMAIN = sor
+    sos.save()
+
+    return HttpResponse('''<script>alert(' Ordered');window.location='/myapp/viewmanufacture/'</script>''')
 
 
 def viewpurchase(request):
-    obj = Purchasemain.objects.all()
-    return render(request, 'seller/purchase.html', {'data':obj})
+    obj = Sellerordersub.objects.filter(SELLERORDERMAIN__SELLER__LOGIN_id=request.session['lid'])
+    spr = Sellerproducts.objects.filter(SELLERORDERSUB__SELLERORDERMAIN__SELLER__LOGIN_id=request.session['lid'])
+    l = []
+    for i in spr:
+        l.append(i.SELLERORDERSUB_id)
+    return render(request, 'seller/purchase.html', {'data':obj, 'spr':l})
 
 def viewpurchasesub(request,id):
     obj = Purchasesub.objects.filter(PURCHASEMAIN=id)
@@ -913,20 +1424,20 @@ def viewpurchasepost(request):
 def viewproducts(request):
     return render(request,'seller/viewmanufacturingproducts.html')
 
-def addproductstosale(request):
+def addproductstosale(request, id):
+    request.session['selPid'] = id
     return render(request,'seller/addproducttosale.html')
 
 def addproductstosalepost(request):
-    productname = request.POST['textfield']
-    description = request.POST['textfield2']
-    category = request.POST['textfield3']
-
-    obj = Seller()
-    obj.productname=productname
-    obj.description=description
-    obj.category=category
-    obj.save()
-    return HttpResponse('''<script>alert(' Added');window.location='/myapp/loginadmin/'</script>''')
+    id = request.session['selPid']
+    saleamount = request.POST['textfield']
+    spr = Sellerproducts()
+    spr.quantity = Sellerordersub.objects.get(id=id).quantity
+    spr.SELLERORDERSUB = Sellerordersub.objects.get(id=id)
+    spr.saleamount = saleamount
+    spr.status = 'available'
+    spr.save()
+    return HttpResponse('''<script>alert(' Product added for sale');window.location='/myapp/viewpurchase/#tab'</script>''')
 
 def sellerhome(request):
     return render(request,'seller/sellerindex.html')
@@ -956,7 +1467,8 @@ def customer_signup(request):#for signup for customers
     date=datetime.now().strftime('%Y%m%d-%H%M%S')+'.jpg'# Generate a filename based on the current date and time
     import base64
     a=base64.b64decode(photo)# Decode base64 encoded image
-    fh=open("C:\\Users\\HP\\PycharmProjects\\supplychain\\media\\user\\"+date,'wb')# Specify the path to save the image
+    # fh=open("C:\\Users\\HP\\PycharmProjects\\supplychain\\media\\user\\"+date,'wb')# Specify the path to save the image
+    fh=open("D:\\sam1\\media\\user\\"+date,'wb')# Specify the path to save the image
     path='/media/user/'+date# Specify the path relative to your media directory
     fh.write(a)
     fh.close()
@@ -998,7 +1510,8 @@ def customer_login(request):
 def customer_viewprofile(request):
     lid=request.POST['lid']
     obj=User.objects.get(LOGIN_id=lid)
-    return JsonResponse({'status':'ok','photo':'/static/login/images/user.png','name':obj.username,'email':obj.email,'phone':obj.phone,'place':obj.place,'post':obj.post,'pin':obj.pin,'district':obj.district,'gender':obj.gender})
+    return JsonResponse({'status':'ok','photo':obj.photo,'name':obj.username,'email':obj.email,'phone':obj.phone,'place':obj.place,'post':obj.post,'pin':obj.pin,'district':obj.district,'gender':obj.gender})
+    # return JsonResponse({'status':'ok','photo':'/static/login/images/user.png','name':obj.username,'email':obj.email,'phone':obj.phone,'place':obj.place,'post':obj.post,'pin':obj.pin,'district':obj.district,'gender':obj.gender})
 
 def customer_editprofile(request):
     name=request.POST['name']
@@ -1016,7 +1529,8 @@ def customer_editprofile(request):
         date = datetime.now().strftime('%Y%m%d-%H%M%S') + '.jpg'
         import base64
         a = base64.b64decode(photo)
-        fh = open("C:\\Users\\HP\\PycharmProjects\\supplychain\\media\\user\\" + date, 'wb')
+        fh = open("D:\\sam1\\media\\user\\" + date, 'wb')
+        # fh = open("D:\\sam1\\media\\media\\user\\" + date, 'wb')
         path = '/media/user/' + date
         fh.write(a)
         fh.close()
@@ -1061,11 +1575,6 @@ def forgot_password(request):
     return JsonResponse({'status': 'no'})
 
 def customer_viewproduct(request):
-    obj=Products.objects.all()
-    l=[]
-    # for i in obj:
-    #     l.append({'id':i.id,'name':i.name,'Image':i.Image,'description':i.description,
-    #               'category':i.category,'unitofmeasurement':i.unitofmeasurement})
     with open(compiled_contract_path) as file:
         contract_json = json.load(file)  # load contract info as JSON
         contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
@@ -1082,19 +1591,20 @@ def customer_viewproduct(request):
             c= decoded_input[1]
             man=Manufacture.objects.filter(LOGIN_id=c['manufacture_ida'])
 
-            if Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',PURCHASESUB__product=str(c['ida'])).exists():
+            # if Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',PURCHASESUB__product=str(c['ida'])).exists():
+            if Sellerproducts.objects.filter(SELLERORDERSUB__SELLERORDERMAIN__status='approved',SELLERORDERSUB__MANUFACTUREPRODUCT_id=str(c['ida'])).exists():
                 if man.exists():
-                    selP = Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',PURCHASESUB__product=str(c['ida']))[0]
+                    selP = Sellerproducts.objects.filter(SELLERORDERSUB__SELLERORDERMAIN__status='approved',SELLERORDERSUB__MANUFACTUREPRODUCT_id=str(c['ida']))[0]
                     man=man[0]
                     print("hloooooooooooooooooooooo")
-                    l.append({'ida':c['ida'],
-                                  'id':selP.id,
+                    l.append({'ida':str(c['ida']),
+                                  'id':str(selP.id),
                                   'name':c['namea'],
                                   'category':c['categorya'],
                                   'description':c['descriptiona'],
                                   'Image':c['specificationa'],
-                                  'unitofmeasurement':c['unitofmeasurementa'],
-                                  'manufacture_ida':c['manufacture_ida'],
+                                  'unitofmeasurement':str(c['unitofmeasurementa']),
+                                  'manufacture_ida':str(c['manufacture_ida']),
                                   'typea':c['typea'],
 
                               'namme':man.name,'phone':man.phone,'email':man.email
@@ -1102,7 +1612,6 @@ def customer_viewproduct(request):
 
                         })
 
-            print(l,'llllllllllllllllll')
        except:
            pass
     return JsonResponse({'status':'ok','data':l})
@@ -1115,13 +1624,28 @@ def customer_makepayment(request):
 
 def customer_vieworderstatus(request):
     lid=request.POST['lid']
-    obj=Productsub.objects.filter(PRODUCTSUBORDERMAIN__USER__LOGIN_id=lid)
+    obj=Customerordersub.objects.filter(CUSTOMERORDERMAIN__USER__LOGIN_id=lid)
     l=[]
-    for i in obj:
-        l.append({'id':i.id,'quantity':i.quantity,
-                  'PRODUCT':i.PRODUCT.name,
-                  'date':i.PRODUCTORDERMAIN.date,'amount':i.PRODUCTORDERMAIN.price,'status':i.PRODUCTORDERMAIN.status})
-        print(i.PRODUCTORDERMAIN.status,'==========')
+    with open(compiled_contract_path) as file:
+        contract_json = json.load(file)  # load contract info as JSON
+        contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
+    contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
+    blocknumber = web3.eth.get_block_number()
+    l = []
+    for j in range(blocknumber, 0, -1):
+
+        try:
+            a = web3.eth.get_transaction_by_block(j, 0)
+            decoded_input = contract.decode_function_input(a['input'])
+            c = decoded_input[1]
+            for i in obj:
+                if int(i.MANUFACTUREPRODUCT_id) == int(c['ida']):
+                    l.append({'id': i.id, 'quantity': i.quantity,
+                              'PRODUCT': i.MANUFACTUREPRODUCT_id,
+                              'date': i.CUSTOMERORDERMAIN.date, 'amount': i.CUSTOMERORDERMAIN.amount,
+                              'status': i.CUSTOMERORDERMAIN.status})
+        except Exception as e:
+            pass
     return JsonResponse({'status':'ok','data':l})
 
 
@@ -1167,8 +1691,11 @@ def customer_addtocart(request):
     pid = request.POST["pid"]
     Quantity = request.POST["Quantity"]
     a = Cart()
+    if Cart.objects.filter(PRODUCTS_id = pid, USER = User.objects.get(LOGIN_id=lid)).exists():
+        a = Cart.objects.filter(PRODUCTS_id = pid, USER = User.objects.get(LOGIN_id=lid))[0]
     a.quantity = Quantity
-    a.PRODUCT = Sellerproducts.objects.get(id=pid)
+    a.PRODUCTS_id = pid
+    # a.PRODUCT = Sellerproducts.objects.get(id=pid)
     a.USER = User.objects.get(LOGIN_id=lid)
     from datetime import datetime
     a.date=datetime.now().date().today()
@@ -1178,21 +1705,12 @@ def customer_addtocart(request):
 
 def user_viewcart(request):
     lid=request.POST['lid']
-    l = []
     total=0
-    # for i in res:
-    #     total+=(float(i.PRODUCT.price)*int(i.quantity))
-    #     l.append({'id': i.id, 'Productname': i.PRODUCT.name,'MRP': i.PRODUCT.price,
-    #               'Offerprice': i.PRODUCT.description,'Colour':i.PRODUCT.category,
-    #               'Quantity':i.quantity,'Primarymaterial':i.PRODUCT.unitofmeasurement,'Image':i.PRODUCT.Image})
-    #     print(l)
-    # print(total)
     with open(compiled_contract_path) as file:
         contract_json = json.load(file)  # load contract info as JSON
         contract_abi = contract_json['abi']  # fetch contract's abi - necessary to call its functions
     contract = web3.eth.contract(address=deployed_contract_addressa, abi=contract_abi)
     blocknumber = web3.eth.get_block_number()
-    print(blocknumber, 'bbbbbbbbbbbbbbb')
     l = []
     for i in range(blocknumber, 0, -1):
 
@@ -1201,17 +1719,14 @@ def user_viewcart(request):
             decoded_input = contract.decode_function_input(a['input'])
             # print(decoded_input[1], 'decoded_input')
             c = decoded_input[1]
-            man = Manufacture.objects.filter(LOGIN_id=c['manufacture_ida'])
-            res = Cart.objects.filter(USER__LOGIN_id=lid,PRODUCT__PURCHASESUB__product=c['ida'])
+            res = Cart.objects.filter(USER__LOGIN_id=lid,PRODUCTS__SELLERORDERSUB__MANUFACTUREPRODUCT_id=c['ida'])
             if res.exists():
-                if Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',
-                                                 PURCHASESUB__product=str(c['ida'])).exists():
+                if Sellerproducts.objects.filter(SELLERORDERSUB__SELLERORDERMAIN__status='approved',
+                                                 SELLERORDERSUB__MANUFACTUREPRODUCT_id=str(c['ida'])).exists():
                     selCart = Cart.objects.filter(
-                        PRODUCT__PURCHASESUB__product=str(c['ida']))[0]
-                    # print(selCart)
-                    # if man.exists():
-                    selP = Sellerproducts.objects.filter(PURCHASESUB__PURCHASEMAIN__SELLER__status='approve',
-                                                         PURCHASESUB__product=str(c['ida']))[0]
+                        PRODUCTS__SELLERORDERSUB__MANUFACTUREPRODUCT_id=str(c['ida']))[0]
+                    selP = Sellerproducts.objects.filter(SELLERORDERSUB__SELLERORDERMAIN__status='approved',
+                                                         SELLERORDERSUB__MANUFACTUREPRODUCT_id=str(c['ida']))[0]
                     total+=(float(selP.saleamount)*int(selCart.quantity))
                     # man = man[0]
                     l.append({
@@ -1232,7 +1747,6 @@ def user_viewcart(request):
 
         except Exception as e:
             pass
-    print(l)
     return JsonResponse({'status': "ok", "data": l,"amount":int(total)})
 
 def removefromcart(request):
@@ -1253,9 +1767,9 @@ def user_makepayment(request):
 
     mytotal=0
     res2 = Cart.objects.filter(USER__LOGIN_id=lid)
-    boj = Productordermain()
+    boj = Customerordermain()
     boj.USER = User.objects.get(LOGIN_id=lid)
-    boj.price = 0
+    boj.amount = 0
     boj.status='paid'
     import datetime
     boj.date = datetime.datetime.now().date().today()
@@ -1263,18 +1777,20 @@ def user_makepayment(request):
 
     try:
         for j in res2:
-            bs = Productsub()
-            bs.PRODUCTORDERMAIN_id = boj.id
-            bs.PRODUCT_id = j.PRODUCT.id
+            bs = Customerordersub()
+            bs.CUSTOMERORDERMAIN_id = boj.id
+            bs.MANUFACTUREPRODUCT_id = j.PRODUCTS.SELLERORDERSUB.MANUFACTUREPRODUCT_id
+            # bs.MANUFACTUREPRODUCT_id = j.PRODUCTS.id
             bs.quantity = j.quantity
             bs.save()
-            mytotal += (float(j.PRODUCT.saleamount) * int(j.quantity))
-    except:
+            mytotal += (float(j.PRODUCTS.saleamount) * int(j.quantity))
+    except Exception as e:
+        print(e)
         pass
     print(mytotal)
     Cart.objects.filter(USER__LOGIN_id=lid).delete()
-    boj=Productordermain.objects.get(id=boj.id)
-    boj.price=mytotal
+    boj=Customerordermain.objects.get(id=boj.id)
+    boj.amount=mytotal
     boj.save()
     return JsonResponse({'k':'0','status':"ok"})
 

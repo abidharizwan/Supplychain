@@ -1,6 +1,8 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/managerawmaterialsaddsupplierpost/#tab" method="post"><table class="pull-left">
+<form action="/myapp/managerawmaterialsaddsupplierpost/#tab" method="post" enctype="multipart/form-data">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
     <th scope="row">Name</th>
@@ -20,7 +22,7 @@
   </tr>
   <tr>
     <th scope="row">Harvest/Production date</th>
-    <td>&nbsp;<input type="text" class="form-control" name="harvest"/></td>
+    <td>&nbsp;<input type="date" class="form-control" name="harvest"/></td>
   </tr>
   <tr>
     <th scope="row">Cost</th>

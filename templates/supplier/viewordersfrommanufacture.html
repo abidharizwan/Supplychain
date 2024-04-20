@@ -1,10 +1,13 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/viewordersfrommanufacturepost/" method="post"><table class="pull-left">
+<form action="/myapp/viewordersfrommanufacturepost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
-  <tr>
-    <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
-    <td><input type="submit" class="btn btn-info" name="button" id="button" value="Search" /></td>
+   <tr>
+    <th scope="row">From</th>
+    <td><input type="date" class="form-control" required name="textfield" id="textfield" /></td>
+    <td>To</td>
+    <td><input type="date" class="form-control" required name="textfield2" id="textfield2" /></td>
+    <td><input type="submit" name="button" class="btn btn-info" id="button" value="Search" /></td>
   </tr>
 </table>
   <table class="table table-bordered">
@@ -13,8 +16,7 @@
       <td>Manufacture Name</td>
       <td>Date</td>
       <td>Amount</td>
-    
-     
+      <td colspan="2"></td>
     </tr>
       {% for i in data %}
     <tr>
@@ -22,8 +24,9 @@
       <td>&nbsp;{{ i.MANUFACTURE.name }}</td>
       <td>&nbsp;{{ i.date}}</td>
       <td>&nbsp;{{ i.amount }}</td>
-      <td>&nbsp;<a class="btn-outline-info" href="/myapp/viewordersub/{{ i.id }}" >ordersub</a></td>
-     
+      <td>&nbsp;<a class="btn-outline-info" href="/myapp/viewordersubsupplier/{{ i.id }}#tab" >ordersub</a></td>
+      <td>&nbsp;<a class="btn-outline-info" href="/myapp/updateorderstatussupplier/{{ i.id }}#tab" >Update</a></td>
+
     </tr>
       {% endfor %}
   </table>

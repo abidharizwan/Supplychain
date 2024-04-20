@@ -1,9 +1,13 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form action="/myapp/viewrawmaterialsandsendorderpost/" method="post"><table class="pull-left">
+    {% load filters %}
+<form action="/myapp/viewrawmaterialsandsendorderpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
-    <th scope="row"><input type="text" name="textfield" id="textfield" /></th>
+    <th scope="row">
+        <input type="text" required name="textfield" id="textfield" />
+        <input type="hidden" name="slid" id="slid" value="{{ slid }}" />
+    </th>
     <td><input type="submit" name="button" class="btn btn-info" id="button" value="Search" /></td>
   </tr>
 </table>
@@ -13,20 +17,24 @@
       <td>Raw material Name</td>
       <td>Amount</td>
       <td>Description</td>
-      <td>Quantity</td>
+      <td>Stock</td>
         
       <td>&nbsp;</td>
     </tr>
       {% for i in data %}
-    <tr>
-      <th scope="row">&nbsp;{{ i.RAWMATERIAL.name }}</th>
-      <td>&nbsp;{{ i.RAWMATERIAL.cost }}</td>
-      <td>&nbsp;{{ i.RAWMATERIAL.description }}</td>
-      
-      
-      <td>{{ i.quantity }}&nbsp;</td>
-      <td><a class="btn btn-outline-info" href="/myapp/quantity/{{ i.RAWMATERIAL.id }}">order</a></td>
-    </tr>
+          {% if search|lower in i.RAWMATERIAL_id|material_info:'namea'|lower %}
+
+            <tr>
+              <th scope="row">&nbsp;{{ i.RAWMATERIAL_id|material_info:'namea' }}</th>
+              <td>&nbsp;{{ i.RAWMATERIAL_id|material_info:'costa' }}</td>
+              <td>&nbsp;{{ i.RAWMATERIAL_id|material_info:'descriptiona' }}</td>
+
+
+              <td>{{ i.quantity }}&nbsp;</td>
+              <td><a class="btn btn-outline-info" href="/myapp/quantity/{{ i.RAWMATERIAL_id }}/{{ i.RAWMATERIAL_id|material_info:'costa' }}#tab">order</a></td>
+            {#      <td><a class="btn btn-outline-info" href="/myapp/viewrawmaterialsandsendorder/{{ i.id }}">order</a></td>#}
+            </tr>
+          {% endif %}
       {% endfor %}
   </table>
 </form>

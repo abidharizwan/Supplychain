@@ -1,6 +1,6 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="/myapp/viewrejectedcustomerorderpost/" method="post"><table class="pull-left">
+<form action="/myapp/viewrejectedcustomerorderpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">From</th>
@@ -31,7 +31,7 @@
 {#    <td>&nbsp;{{ i.quantity }}</td>#}
     
        
-        <td>&nbsp;<a class="btn btn-outline-info" href="/myapp/viewordersub/{{ i.id }}" >ordersub</a></td>
+        <td>&nbsp;<a class="btn btn-outline-info" href="/myapp/viewordersub/{{ i.id }}/#tab" >ordersub</a></td>
 {#          <td>&nbsp;<a href="/myapp/updateorderstatus/{{ i.id }}" >Approve</a></td>#}
 {#          <td>&nbsp;<a href="/myapp/updateorderstatus/{{ i.id }}" >Reject</a></td>#}
    {% endfor %}

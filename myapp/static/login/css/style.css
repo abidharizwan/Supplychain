@@ -239,7 +239,7 @@ button:hover {
 }
 .forms23-block-hny .form23 form .input-form:focus {
   background: rgba(43, 32, 34, 0.09);
-  border: 1px solid #2B2022;
+  border: 1px solid #808000;
 }
 .forms23-block-hny .form23 p {
   margin-top: 20px;
@@ -258,7 +258,7 @@ button:hover {
   line-height: 24px;
   text-transform: uppercase;
   border: none;
-  background: #2B2022;
+  background: #556B2F;
   border-radius:4px;
   -webkit-border-radius:4px;
   -o-border-radius:4px;
@@ -267,8 +267,8 @@ button:hover {
 }
 
 .forms23-block-hny button.btn.loginhny-btn:hover {
-  background: #BD783A;
-  color: #2B2022;
+  background: #8FBC8F;
+  color: #000000;
   text-decoration: none;
   transition: all 0.2s ease;
   -moz-transition: all 0.2s ease;
@@ -281,7 +281,7 @@ button:hover {
   font-size: 15px;
   line-height: 20px;
   font-weight: bold;
-  color: #BD783A;
+  color: #8FBC8F;
 }
 .forms23-block-hny .form23 a:hover {
   color:#2B2022;
@@ -343,7 +343,7 @@ button:hover {
 }
 
 .w3l-copy-right p a {
-  color: #bd783a;
+  color: #8FBC8F;
 }
 .w3l-copy-right p a:hover {
   color:#fff;

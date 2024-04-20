@@ -1,6 +1,9 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/viewordersubpost/" method="post"><table class="pull-left">
+{% load filters %}
+<form action="/myapp/viewordersubpost/#tab" method="post">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
     <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
@@ -10,25 +13,20 @@
   <table class="table table-bordered">
     <tr>
       <th scope="row">Sl.no</th>
-      
       <td>Amount</td>
+      <td>Material</td>
       <td>Quantity</td>
-      <td>Description</td>
-
-     
     </tr>
       {% for i in data %}
+          {% if search|lower in i.RAWMATERIAL_id|material_info:'namea'|lower %}
+
     <tr>
-      <th scope="row">&nbsp;{{ forloop.counter }}</th>
-      <td>&nbsp;{{ i.RAWMATERIALORDERMAIN.amount }}</td>
+        <th scope="row">&nbsp;{{ forloop.counter }}</th>
+        <td>&nbsp;{{ i.RAWMATERIALORDERMAIN.amount }}</td>
+        <td>&nbsp;{{ i.RAWMATERIAL_id|material_info:'namea' }}</td>
         <td>&nbsp;{{ i.quantity }}</td>
-                <td>&nbsp;{{ i.productdescription }}</td>
-      
-
-
-      <td>&nbsp;<a href="/myapp/" </td>
-     
     </tr>
+          {% endif %}
       {% endfor %}
   </table>
 </form>

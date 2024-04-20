@@ -1,35 +1,37 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form action="/myapp/manufactureeditprofilepost/" method="post" enctype="multipart/form-data"><table class="pull-left">
+<form action="/myapp/manufactureeditprofilepost/#tab" method="post" enctype="multipart/form-data">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
     <th scope="row">Name</th>
-    <td><input type="text" class="form-control" name="textfield" id="textfield" value="{{ data.name }}"/></td>
+    <td><input type="text" class="form-control" required name="textfield" id="textfield" value="{{ data.name }}"/></td>
   </tr>
   <tr>
     <th scope="row">Email</th>
-    <td><input type="text" class="form-control" name="textfield2" id="textfield2" value="{{ data.email }}"/></td>
+    <td><input type="text" class="form-control" required name="textfield2" id="textfield2" value="{{ data.email }}"/></td>
   </tr>
   <tr>
     <th scope="row">Phone</th>
-    <td><input type="text" class="form-control" name="textfield3" id="textfield3" value="{{ data.phone }}"/></td>
+    <td><input type="text" class="form-control" required name="textfield3" id="textfield3" value="{{ data.phone }}"/></td>
   </tr>
   <tr>
     <th scope="row">Website</th>
-    <td><input type="text" class="form-control" name="textfield4" id="textfield4" value="{{ data.website }}"/></td>
+    <td><input type="text" class="form-control" required name="textfield4" id="textfield4" value="{{ data.website }}"/></td>
   </tr>
   <tr>
     <th scope="row">Location</th>
-    <td><input type="text" class="form-control" name="textfield5" id="textfield5" value="{{ data.location }}"/></td>
+    <td><input type="text" class="form-control" required name="textfield5" id="textfield5" value="{{ data.location }}"/></td>
   </tr>
-  <tr>
-    <th scope="row">Registrationdate</th>
-    <td><input type="text" class="form-control" name="textfield6" id="textfield6" value="{{ data.registrationdate }}"/></td>
-  </tr>
-  <tr>
-    <th scope="row">Status</th>
-    <td><input type="text" class="form-control" name="textfield7" id="textfield7" value="{{ data.status }}"/></td>
-  </tr>
+{#  <tr>#}
+{#    <th scope="row">Registrationdate</th>#}
+{#    <td><input type="text" class="form-control" required name="textfield6" id="textfield6" value="{{ data.registrationdate }}"/></td>#}
+{#  </tr>#}
+{#  <tr>#}
+{#    <th scope="row">Status</th>#}
+{#    <td><input type="text" class="form-control" required name="textfield7" id="textfield7" value="{{ data.status }}"/></td>#}
+{#  </tr>#}
   <tr>
     <th scope="row">Logo</th>
     <td><img src="{{ data.logo }}" height="50px" width="50px" alt=""/><input type="file" name="textfield8" id="textfield8" /></td>

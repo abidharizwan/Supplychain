@@ -1,12 +1,12 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="/myapp/viewcustomerorderpost/" method="post"><table class="pull-left">
+<form action="/myapp/viewcustomerorderpost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">From</th>
-    <td><input type="date" class="form-control" name="textfield" id="textfield" /></td>
+    <td><input type="date" required class="form-control" name="textfield" id="textfield" /></td>
     <td>To</td>
-    <td><input type="date" class="form-control" name="textfield2" id="textfield2" /></td>
+    <td><input type="date" required class="form-control" name="textfield2" id="textfield2" /></td>
     <td><input type="submit" name="button" class="btn btn-info" id="button" value="Search" /></td>
   </tr>
 </table><table class="table table-bordered">
@@ -14,10 +14,9 @@
     <th scope="row">Sl.no</th>
     <td>Orderdate</td>
     <td>User</td>
-{#    <td>Product Name</td>#}
-{#    <td>Quantity</td>#}
-    <td>status</td>  
     <td>Amount</td>
+    <td></td>
+    <td></td>
   </tr>
     {% for i in data %}
   <tr>
@@ -25,15 +24,16 @@
     <th scope="row">&nbsp;{{ forloop.counter }}</th>
         <td>&nbsp;{{ i.date }}</td>
         <td>&nbsp;{{ i.USER.username }}</td>
-        <td>&nbsp;{{ i.status }}</td>
         <td>&nbsp;{{ i.amount }}</td>
-{#    <td>&nbsp;{{ i.MANUFACTUREPRODUCT.productname }}</td>#}
-{#    <td>&nbsp;{{ i.quantity }}</td>#}
-    
+
        
-        <td>&nbsp;<a class="btn btn-outline-info" href="/myapp/viewordersub/{{ i.id }}" >ordersub</a></td>
-          <td>&nbsp;<a class="btn btn-outline-info" href="/myapp/updateorderstatus/{{ i.id }}" >Approve</a></td>
-          <td>&nbsp;<a class="btn btn-outline-danger" href="/myapp/updateorderreject/{{ i.id }}" >Reject</a></td>
+        <td>&nbsp;<a class="btn btn-outline-info" href="/myapp/viewordersub/{{ i.id }}#tab" >ordersub</a></td>
+          <td>&nbsp;{% if i.status == 'ordered' or i.status == 'pending' %}
+                <a class="btn btn-outline-info" href="/myapp/updateorderstatus/{{ i.id }}#tab" >Approve</a>
+                <a class="btn btn-outline-danger" href="/myapp/updateorderreject/{{ i.id }}#tab" >Reject</a>
+              {% else %}
+              {{ i.status }}
+          {% endif %}</td>
    {% endfor %}
   </tr>
 </table>

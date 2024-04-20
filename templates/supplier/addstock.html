@@ -1,6 +1,8 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/addstocksupplierpost/#tab" method="post"><table class="pull-left">
+<form action="/myapp/addstocksupplierpost/#tab" method="post">
+  <table class="table table-bordered">
+
 {% csrf_token %}
   <tr>
     <th scope="row">Quantity</th>

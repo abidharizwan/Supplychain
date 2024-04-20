@@ -1,10 +1,10 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form id="form1" name="form1" method="post" action="/myapp/viewsupplierpost/" ><table class="pull-left">
+<form id="form1" name="form1" method="post" action="/myapp/viewsupplierpost/#tab" ><table class="pull-left">
 {% csrf_token %}
   <table class="">
     <tr>
-      <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
+      <th scope="row"><input required type="text" class="form-control" name="textfield" id="textfield" /></th>
       <td><input type="submit" name="button" class="btn btn-info" id="button" value="Search" /></td>
     </tr>
   </table>
@@ -29,9 +29,9 @@
       <td>&nbsp;{{ i.website }}</td>
       <td>&nbsp;{{ i.location }}</td>
       <td>&nbsp;{{ i.industry }}</td>
-      <td>&nbsp;<img src="{{ i.certification }} height=50px width=50px"  alt=""/></td>
+      <td>&nbsp;<img src="{{ i.certification }}" height="50px" width="50px"  alt=""/></td>
         
-        <td><a class="btn btn-outline-info" href="/myapp/viewrawmaterialsandsendorder/{{ i.id }}">order</a></td>
+        <td><a class="btn btn-outline-info" href="/myapp/viewrawmaterialsandsendorder/{{ i.LOGIN.id }}#tab">order</a></td>
       
     </tr>
       {% endfor %}

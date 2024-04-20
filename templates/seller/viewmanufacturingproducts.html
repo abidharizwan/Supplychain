@@ -1,6 +1,6 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="/myapp/viewmanufacturingproductspost/" method="post"><table class="pull-left">
+<form action="/myapp/viewmanufacturingproductspost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
@@ -9,6 +9,7 @@
 </table>
   <table class="table table-bordered">
     <tr>
+      <th scope="row">S.No</th>
       <th scope="row">product name</th>
       <td>Category</td>
       <td>Description</td>
@@ -17,10 +18,11 @@
       {% for i in data %}
         <tr>
           <th scope="row">&nbsp;{{ forloop.counter }}</th>
-          <td>&nbsp;{{ i.productname }}</td>
-          <td>&nbsp;{{ i.category }}</td>
-          <td>&nbsp;{{ i.description }}</td>
-          <td>&nbsp;{{ i.unitofmeasurement }}</td>
+          <td>&nbsp;{{ i.namea }}</td>
+          <td>&nbsp;{{ i.categorya }}</td>
+          <td>&nbsp;{{ i.descriptiona }}</td>
+          <td>&nbsp;{{ i.unitofmeasurementa }}</td>
+          <td><a href="/myapp/seller_product_quantity/{{ i.ida }}#tab" class="btn btn-info">Buy</a> </td>
         
         </tr>
       {% endfor %}

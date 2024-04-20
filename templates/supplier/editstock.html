@@ -1,6 +1,8 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/editstocksupplierpost/" method="post"><table class="pull-left">
+<form action="/myapp/editstocksupplierpost/#tab" method="post">
+  <table class="table table-bordered">
+
 {% csrf_token %}
   <tr>
       <input type="hidden" name="id" value="{{ data1.id }}">

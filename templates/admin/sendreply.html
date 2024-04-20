@@ -1,6 +1,8 @@
 {% extends "admin/adminindex.html"%}
 {% block body %}
-<form action="/myapp/sendreplypost/" method="post"><table class="pull-left">
+<form action="/myapp/sendreplypost/" method="post">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
       <input type="hidden"  name="cid" value="{{ id }}">

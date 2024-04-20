@@ -1,6 +1,8 @@
 {% extends "supplier/supplierindex.html"%}
 {% block body %}
-<form action="/myapp/editsupplierpost/#tab" method="post"enctype="multipart/form-data"> <table class="pull-left">
+<form action="/myapp/editsupplierpost/#tab" method="post"enctype="multipart/form-data">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
 {#      <input type="hidden" value="{{ data.id }}" name="id">#}

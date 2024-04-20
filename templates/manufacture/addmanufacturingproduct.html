@@ -1,27 +1,29 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form action="/myapp/managemanufactureproductaddpost/" method="post"><table class="pull-left">
+<form action="/myapp/addmanufacturingproductpost/" method="post" enctype="multipart/form-data">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
     <th scope="row">Name</th>
-    <td><input type="text" class="form-control" name="textfield" id="textfield" /></td>
+    <td><input type="text" class="form-control" required name="textfield" id="textfield" /></td>
   </tr>
   <tr>
     <th scope="row">Category</th>
-    <td><input type="text" class="form-control" name="textfield2" id="textfield2" /></td>
+    <td><input type="text" class="form-control" required name="textfield2" id="textfield2" /></td>
   </tr>
   <tr>
     <th scope="row">Description</th>
-    <td><input type="text" class="form-control" name="textfield3" id="textfield3" /></td>
+    <td><input type="text" class="form-control" required name="textfield3" id="textfield3" /></td>
   </tr>
   <tr>
-    <th scope="row">Specification</th>
-    <td><input type="text" class="form-control" name="textfield4" id="textfield4" /></td>
+    <th scope="row">Photo</th>
+    <td><input type="file" class="form-control" required name="textfield4" id="textfield4" /></td>
   </tr>
   
   <tr>
     <th scope="row">Unit of measurement</th>
-    <td><input type="text" class="form-control" name="textfield5" id="textfield5" /></td>
+    <td><input type="text" class="form-control" required name="textfield5" id="textfield5" /></td>
   </tr>
   <tr>
     <th scope="row">&nbsp;</th>

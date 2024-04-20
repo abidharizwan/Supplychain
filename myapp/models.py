@@ -44,6 +44,7 @@ class User(models.Model):
     pin = models.IntegerField()
     district = models.CharField(max_length=100)
     phone = models.BigIntegerField()
+    photo = models.CharField(max_length=200)
     gender = models.CharField(max_length=100)
     LOGIN = models.ForeignKey(Login,on_delete=models.CASCADE)
 
@@ -70,7 +71,7 @@ class  Seller(models.Model):
     website = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     LOGIN = models.ForeignKey(Login,on_delete=models.CASCADE)
-    dateofbirth = models.DateField()
+    dateofbirth = models.CharField(max_length=15)
     status = models.CharField(max_length=100)
     certificate = models.CharField(max_length=250)
 
@@ -87,7 +88,9 @@ class Rawmaterials(models.Model):
 
 class Stockrawmaterial(models.Model):
     quantity = models.IntegerField()
-    RAWMATERIAL = models.ForeignKey(Rawmaterials,on_delete=models.CASCADE)
+    RAWMATERIAL_id = models.IntegerField()
+    SUPPLIER = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    # RAWMATERIAL = models.ForeignKey(Rawmaterials,on_delete=models.CASCADE)
 
 class Rawmaterialordermain(models.Model):
     date = models.DateField()
@@ -97,8 +100,9 @@ class Rawmaterialordermain(models.Model):
 
 class Rawmaterialoredrsub(models.Model):
     RAWMATERIALORDERMAIN=models.ForeignKey(Rawmaterialordermain,on_delete=models.CASCADE)
-    RAWMATERIAL=models.ForeignKey(Rawmaterials,on_delete=models.CASCADE,default="")
-    productdescription=models.CharField(max_length=250)
+    RAWMATERIAL_id=models.IntegerField()
+    # RAWMATERIAL=models.ForeignKey(Rawmaterials,on_delete=models.CASCADE,default="")
+    # productdescription=models.CharField(max_length=250)
     quantity=models.CharField(max_length=100)
 
 
@@ -119,9 +123,9 @@ class Customerordermain(models.Model):
     status = models.CharField(max_length=100)
 
 class Sellerordermain(models.Model):
-    SELLER = models.ForeignKey(User,on_delete=models.CASCADE)
-    date = models.DateField()
-    amount = models.CharField(max_length=100)
+    SELLER = models.ForeignKey(Seller,on_delete=models.CASCADE)
+    date = models.CharField(max_length=15)
+    # amount = models.CharField(max_length=100)
     status = models.CharField(max_length=100)
 
 class Payment(models.Model):
@@ -141,12 +145,14 @@ class Manufactureproducts(models.Model):
 
 class Customerordersub(models.Model):
     CUSTOMERORDERMAIN = models.ForeignKey(Customerordermain, on_delete=models.CASCADE)
-    MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
+    MANUFACTUREPRODUCT_id = models.IntegerField()
+    # MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
     quantity = models.CharField(max_length=100)
 
 class Sellerordersub(models.Model):
-    SELLERORDERMAIN = models.ForeignKey(Customerordermain, on_delete=models.CASCADE)
-    MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
+    SELLERORDERMAIN = models.ForeignKey(Sellerordermain, on_delete=models.CASCADE)
+    MANUFACTUREPRODUCT_id = models.IntegerField()
+    # MANUFACTUREPRODUCT = models.ForeignKey(Manufactureproducts, on_delete=models.CASCADE)
     quantity = models.CharField(max_length=100)
 
 class Products(models.Model):
@@ -178,10 +184,10 @@ class Purchasesub(models.Model):
 #     status=models.CharField(max_length=100)
 #
 class Sellerproducts(models.Model):
-     PURCHASESUB=models.ForeignKey(Purchasesub, on_delete=models.CASCADE)
-     saleamount=models.FloatField()
-     quantity=models.IntegerField()
-     status=models.CharField(max_length=100)
+    SELLERORDERSUB=models.ForeignKey(Sellerordersub, on_delete=models.CASCADE)
+    saleamount=models.FloatField()
+    quantity=models.IntegerField()
+    status=models.CharField(max_length=100)
 
 class Cart(models.Model):
     date=models.DateTimeField()
@@ -207,8 +213,8 @@ class Productordermain(models.Model):
 
 class Productsub(models.Model):
     PRODUCTSUBORDERMAIN=models.ForeignKey(Productordermain,on_delete=models.CASCADE)
-    description=models.CharField(max_length=100)
-    quantity=models.CharField(max_length=100)
+    PRODUCT_id=models.IntegerField()
+    quantity=models.IntegerField()
 
 # class Feedback(models.Model):
 #     rating=models.CharField(max_length=100)

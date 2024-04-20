@@ -1,6 +1,6 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="/myapp/viewmanufacturepost/" method="post"><table class="pull-left">
+<form action="/myapp/viewmanufacturepost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row"><input type="text" class="form-control" name="textfield" id="textfield" /></th>
@@ -15,7 +15,8 @@
       <td>phone</td>
       <td>website</td>
       <td>location</td>
-        
+      <td></td>
+
      
     </tr>
       {% for i in data %}
@@ -26,7 +27,8 @@
       <td>&nbsp;{{ i.phone }}</td>
       <td>&nbsp;{{ i.website }}</td>
       <td>&nbsp;{{ i.location }}</td>
-     
+      <td>&nbsp;<a href="/myapp/viewmanufacturingproducts/{{ i.LOGIN.id }}#tab" class="btn btn-info">Products</a> </td>
+
       {% endfor %}
     </tr>
   </table>

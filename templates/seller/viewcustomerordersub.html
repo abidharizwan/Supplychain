@@ -1,17 +1,10 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="" method="post"><table class="pull-left">
-    
+{% load filters %}
+<form action="" method="post">
+    <table class="table table-bordered">
   <tr>
-{#    <th scope="row">From</th>#}
-{#    <td><input type="text" name="textfield" id="textfield" /></td>#}
-{#    <td>To</td>#}
-{#    <td><input type="text" name="textfield2" id="textfield2" /></td>#}
-{#    <td><input type="submit" name="button" id="button" value="Search" /></td>#}
-  </tr>
-</table><table class="table table-bordered">
-  <tr>
-{#    <th scope="row">Sl.no</th>#}
+    <th scope="row">Sl.no</th>
     <td>Quantity</td>
     <td>Product</td>
 
@@ -19,10 +12,9 @@
     {% for i in data %}
   <tr>
     
-{#    <th scope="row">&nbsp;{{ forloop.counter }}</th>#}
-
+    <th scope="row">&nbsp;{{ forloop.counter }}</th>
     <td>&nbsp;{{ i.quantity }}</td>
-    <td>&nbsp;{{ i.MANUFACTUREPRODUCT.productname }}</td>
+    <td>&nbsp;{{ i.MANUFACTUREPRODUCT_id|product_info:'namea' }}</td>
 
    {% endfor %}
   </tr>

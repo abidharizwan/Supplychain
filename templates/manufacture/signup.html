@@ -1,6 +1,8 @@
 {% extends "signupindex.html"%}
 {% block body %}
-<form action="/myapp/signupmanufacturepost/" method="post" enctype="multipart/form-data"><table class="pull-left">
+<form action="/myapp/signupmanufacturepost/" method="post" enctype="multipart/form-data">
+  <table class="table table-bordered">
+
     {% csrf_token %}
   <tr>
     <th scope="row">Name</th>

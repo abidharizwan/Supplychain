@@ -1,10 +1,12 @@
 {% extends "manufacture/manufactureindex.html"%}
 {% block body %}
-<form action="/myapp/orderrawmaterial/" method="post"><table class="pull-left">
+<form action="/myapp/orderrawmaterial/#tab" method="post">
+  <table class="table table-bordered">
+
 {% csrf_token %}
   <tr>
     <th scope="row">Quantity</th>
-    <td><input type="text" class="form-control" name="textfield" id="textfield" /></td>
+    <td><input type="number" min="1" required class="form-control" name="textfield" id="textfield" /></td>
   </tr>
   <input type="hidden" name="id" id="textfield" value="{{ id }}" />
   <tr>

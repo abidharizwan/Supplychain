@@ -1,6 +1,6 @@
 {% extends "seller/sellerindex.html"%}
 {% block body %}
-<form action="/myapp/viewpaymentspost/" method="post"><table class="pull-left">
+<form action="/myapp/viewpaymentspost/#tab" method="post"><table class="pull-left">
     {% csrf_token %}
   <tr>
     <th scope="row">From</th>
